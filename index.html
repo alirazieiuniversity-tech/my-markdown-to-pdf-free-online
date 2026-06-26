@@ -26,6 +26,7 @@ button:hover{opacity:.85}
 .btn-align.active{background:#f39c12;color:#1e3a5f}
 .btn-dir{background:#16a085;color:white}
 .btn-clear{background:#7f8c8d;color:white}
+.btn-undo-redo{background:#34495e;color:white}
 .container{display:flex;gap:0;padding:14px;height:calc(100vh - 64px)}
 .panel{background:white;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.1);display:flex;flex-direction:column;overflow:hidden}
 .panel:first-of-type{flex:1}
@@ -34,9 +35,11 @@ button:hover{opacity:.85}
 .resizer:hover{background:#1e3a5f}
 .resizer::before{content:'⋮';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#888;font-size:1.1rem;letter-spacing:-4px}
 .panel-header{background:#f8f9fa;padding:9px 14px;font-weight:bold;font-size:.88rem;border-bottom:1px solid #e5e5e5;color:#555;display:flex;align-items:center;gap:6px}
-#selectionToolbar{display:none;position:fixed;z-index:9999;background:#1e3a5f;border-radius:8px;padding:6px 8px;gap:4px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
-#selectionToolbar button{background:rgba(255,255,255,.15);color:white;border-radius:5px;padding:5px 10px;font-size:.8rem}
+#selectionToolbar{display:none;position:fixed;z-index:9999;background:#1e3a5f;border-radius:8px;padding:6px 8px;gap:6px;box-shadow:0 4px 20px rgba(0,0,0,.3);align-items:center}
+#selectionToolbar button{background:rgba(255,255,255,.15);color:white;border-radius:5px;padding:5px 8px;font-size:.8rem}
 #selectionToolbar button:hover{background:rgba(255,255,255,.3)}
+#selectionToolbar select{background:rgba(255,255,255,.15);color:white;border:none;border-radius:5px;padding:4px;font-size:.8rem;outline:none;cursor:pointer}
+#selectionToolbar select option{background:#1e3a5f;color:white}
 #selectionToolbar .tb-sep{width:1px;background:rgba(255,255,255,.2);align-self:stretch;margin:0 2px}
 #mdInput{flex:1;border:none;outline:none;padding:16px;font-size:.93rem;font-family:'Courier New',monospace;resize:none;direction:rtl;line-height:1.8}
 #preview{flex:1;padding:20px;overflow-y:auto;line-height:1.9;font-size:1rem}
@@ -138,7 +141,7 @@ input:checked+.slider:before{transform:translateX(-20px)}
   *{print-color-adjust:exact;-webkit-print-color-adjust:exact}
   .container{display:block;padding:0;height:auto}
   .panel{box-shadow:none;border-radius:0}
-  #coverPage{display:flex!important}
+  #coverPage.active{display:flex!important}
   #preview{padding:20mm;font-size:12pt;line-height:2}
   .img-wrapper{padding-top:0!important}
   .modal-backdrop{display:none!important}
@@ -158,7 +161,34 @@ input:checked+.slider:before{transform:translateX(-20px)}
 </head>
 <body>
 
+<input type="file" id="fontFileInput" accept=".ttf,.woff,.woff2,.otf" style="display:none" onchange="loadUploadedFont(event)">
+
 <div id="selectionToolbar">
+  <button onclick="applyStyle('bold')" title="ضخیم"><b>B</b></button>
+  <button onclick="applyStyle('italic')" title="ایتالیک"><i>I</i></button>
+  <button onclick="applyStyle('underline')" title="خط‌دار"><u>U</u></button>
+  <div class="tb-sep"></div>
+  <select id="selFontFamily" onchange="applyCustomFont(this.value)">
+    <option value="">فونت...</option>
+    <option value="'Segoe UI', Tahoma, sans-serif">Segoe UI</option>
+    <option value="'Vazirmatn', sans-serif">وزیرمتن</option>
+    <option value="'Times New Roman', serif">Times New Roman</option>
+    <option value="Georgia, serif">Georgia</option>
+    <option value="Arial, sans-serif">Arial</option>
+  </select>
+  <button onclick="triggerFontUpload()" title="آپلود فونت جدید از سیستم">➕</button>
+  <select id="selFontSize" onchange="applyCustomSize(this.value)">
+    <option value="">اندازه...</option>
+    <option value="12px">12px</option>
+    <option value="14px">14px</option>
+    <option value="16px">16px</option>
+    <option value="18px">18px</option>
+    <option value="20px">20px</option>
+    <option value="24px">24px</option>
+    <option value="28px">28px</option>
+    <option value="32px">32px</option>
+  </select>
+  <div class="tb-sep"></div>
   <button onclick="applySelectionAlign('right')">≡ راست</button>
   <button onclick="applySelectionAlign('center')">≡ وسط</button>
   <button onclick="applySelectionAlign('left')">≡ چپ</button>
@@ -320,14 +350,19 @@ input:checked+.slider:before{transform:translateX(-20px)}
         </div>
       </div>
       <div class="toggle-row" style="margin-bottom:0">
-        <label class="lbl" for="pnSkipCover">شماره‌گذاری از کاور شروع نشود
-          <span class="lbl-hint">اگر کاور دارید، صفحه کاور شماره نمی‌خورد و صفحه بعدی از ۱ شروع می‌شود</span>
+        <label class="lbl" for="pnSkipCover">صفحه کاور شماره نخورد (شمارش از صفحه بعد، با عدد ۱)
+          <span class="lbl-hint">کاور عملاً صفحه‌ی صفر و بدون شماره‌ی قابل‌مشاهده در نظر گرفته می‌شود؛ صفحه‌ی بعدی با عدد ۱ شروع می‌شود</span>
         </label>
         <label class="switch"><input type="checkbox" id="pnSkipCover" checked><span class="slider"></span></label>
       </div>
       <div style="background:#fff7e6;border:1px solid #f3d9a4;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:.78rem;color:#7a5b1e;line-height:1.7">
         ⚠️ <b>نکته‌ی مهم:</b> در پنجره‌ی چاپ Chrome، روی «More settings» کلیک کنید و گزینه‌ی <b>Margins</b> را روی <b>None</b> بگذارید. اگر روی Default بماند، خود Chrome حاشیه‌ی خودش را به‌جای تنظیمات این برنامه اعمال می‌کند و فاصله‌ی شماره صفحه درست دیده نمی‌شود.
       </div>
+    </div>
+
+    <!-- Info about PDF Folder destination selection -->
+    <div style="background:#eef4fb;border:1px solid #bce0fd;border-radius:8px;padding:10px 12px;margin-top:12px;font-size:.78rem;color:#1e3a5f;line-height:1.7">
+      💾 <b>انتخاب مسیر ذخیره‌سازی PDF:</b> پس از کلیک روی دکمه چاپ زیر، در پنجره سیستم بازشده، بخش Destination را بر روی <b>Save as PDF</b> قرار دهید. بعد از زدن دکمه Save، مرورگر به‌صورت خودکار فولدری را برای ذخیره‌سازی از شما سؤال خواهد کرد.
     </div>
 
     <div class="modal-btns" style="margin-top:22px">
@@ -355,6 +390,10 @@ input:checked+.slider:before{transform:translateX(-20px)}
     <button class="btn-dir" onclick="setDir('rtl')">RTL</button>
     <button class="btn-dir" onclick="setDir('ltr')">LTR</button>
     <div class="separator"></div>
+    <button class="btn-undo-redo" id="btnUndo" onclick="undo()" title="برگشت به عقب (Ctrl+Z)">↩️ عقب</button>
+    <button class="btn-undo-redo" id="btnRedo" onclick="redo()" title="رفتن به جلو (Ctrl+Y)">↪️ جلو</button>
+    <button class="btn-align" onclick="syncMarkdownAndPreview()" style="background:#f39c12;padding:6px 10px;" title="همگام‌سازی تغییرات دستی پیش‌نمایش به باکس مارک‌داون">🔄 همگام‌سازی</button>
+    <div class="separator"></div>
     <button class="btn-clear" onclick="clearAll()">🗑 پاک</button>
   </div>
 </header>
@@ -378,11 +417,66 @@ input:checked+.slider:before{transform:translateX(-20px)}
 marked.setOptions({breaks:true,gfm:true});
 const input=document.getElementById('mdInput'),preview=document.getElementById('preview');
 
+// Undo/Redo State Manager
+const historyStack = [];
+let historyIndex = -1;
+const maxHistory = 50;
+
+function saveState() {
+  const currentState = {
+    md: input.value,
+    preview: preview.innerHTML
+  };
+  if (historyIndex < historyStack.length - 1) {
+    historyStack.splice(historyIndex + 1);
+  }
+  historyStack.push(currentState);
+  if (historyStack.length > maxHistory) {
+    historyStack.shift();
+  }
+  historyIndex = historyStack.length - 1;
+}
+
+function undo() {
+  if (historyIndex > 0) {
+    historyIndex--;
+    loadHistoryState(historyStack[historyIndex]);
+  }
+}
+
+function redo() {
+  if (historyIndex < historyStack.length - 1) {
+    historyIndex++;
+    loadHistoryState(historyStack[historyIndex]);
+  }
+}
+
+function loadHistoryState(state) {
+  input.value = state.md;
+  preview.innerHTML = state.preview;
+}
+
+// Bind keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+    e.preventDefault();
+    undo();
+  }
+  if (e.ctrlKey && e.key.toLowerCase() === 'y') {
+    e.preventDefault();
+    redo();
+  }
+});
+
 function renderPreview(){
   preview.innerHTML=marked.parse(input.value);
   renderMathInElement(preview,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false});
 }
-input.addEventListener('input',renderPreview);
+
+input.addEventListener('input', () => {
+  renderPreview();
+  saveState();
+});
 
 // Resizer
 const resizer=document.getElementById('resizer'),lp=document.getElementById('leftPanel'),rp=document.getElementById('rightPanel'),cont=document.querySelector('.container');
@@ -392,8 +486,18 @@ document.addEventListener('mousemove',e=>{if(!isR)return;const r=cont.getBoundin
 document.addEventListener('mouseup',()=>{if(isR){isR=false;document.body.style.cursor='';document.body.style.userSelect=''}});
 
 // Global align/dir
-function setGlobalAlign(a){preview.style.textAlign=a;input.style.textAlign=a;['R','C','L'].forEach(k=>document.getElementById('gbtn'+k).classList.remove('active'));document.getElementById('gbtn'+(a==='right'?'R':a==='center'?'C':'L')).classList.add('active')}
-function setDir(d){preview.style.direction=d;input.style.direction=d}
+function setGlobalAlign(a){
+  preview.style.textAlign=a;
+  input.style.textAlign=a;
+  ['R','C','L'].forEach(k=>document.getElementById('gbtn'+k).classList.remove('active'));
+  document.getElementById('gbtn'+(a==='right'?'R':a==='center'?'C':'L')).classList.add('active');
+  saveState();
+}
+function setDir(d){
+  preview.style.direction=d;
+  input.style.direction=d;
+  saveState();
+}
 
 // Selection toolbar
 const selTb=document.getElementById('selectionToolbar');
@@ -406,12 +510,79 @@ function showSelTb(){
   if(!preview.contains(range.commonAncestorContainer)){selTb.style.display='none';return}
   const rect=range.getBoundingClientRect();
   selTb.style.display='flex';
-  selTb.style.top=(rect.top+window.scrollY-44)+'px';
-  selTb.style.left=(rect.left+window.scrollX+rect.width/2-100)+'px';
+  selTb.style.top=(rect.top+window.scrollY-54)+'px';
+  selTb.style.left=(rect.left+window.scrollX+rect.width/2-150)+'px';
 }
 document.addEventListener('mousedown',e=>{if(!selTb.contains(e.target))selTb.style.display='none'});
-function applySelectionAlign(a){const sel=window.getSelection();if(!sel||sel.isCollapsed)return;getSelBlocks(sel.getRangeAt(0)).forEach(b=>b.style.textAlign=a);selTb.style.display='none';sel.removeAllRanges()}
-function applySelectionDir(d){const sel=window.getSelection();if(!sel||sel.isCollapsed)return;getSelBlocks(sel.getRangeAt(0)).forEach(b=>{b.style.direction=d;b.style.textAlign=d==='rtl'?'right':'left'});selTb.style.display='none';sel.removeAllRanges()}
+
+// Inline selective styling functions
+function applyStyle(command) {
+  document.execCommand(command, false, null);
+  saveState();
+}
+
+function applyCustomFont(fontName) {
+  if(!fontName) return;
+  document.execCommand('fontName', false, fontName);
+  saveState();
+}
+
+function applyCustomSize(size) {
+  if(!size) return;
+  const sel = window.getSelection();
+  if(!sel.rangeCount || sel.isCollapsed) return;
+  
+  const range = sel.getRangeAt(0);
+  const span = document.createElement('span');
+  span.style.fontSize = size;
+  try {
+    range.surroundContents(span);
+  } catch(e) {
+    document.execCommand('fontSize', false, '3');
+    const fonts = preview.querySelectorAll('font[size="3"]');
+    fonts.forEach(f => {
+      f.removeAttribute('size');
+      f.style.fontSize = size;
+    });
+  }
+  saveState();
+}
+
+function triggerFontUpload() {
+  document.getElementById('fontFileInput').click();
+}
+
+function loadUploadedFont(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const fontName = file.name.split('.')[0].replace(/[^a-zA-Z0-9]/g, '_');
+    const fontDataUrl = evt.target.result;
+    
+    const style = document.createElement('style');
+    style.textContent = `
+      @font-face {
+        font-family: '${fontName}';
+        src: url('${fontDataUrl}');
+      }
+    `;
+    document.head.appendChild(style);
+    
+    const sel = document.getElementById('selFontFamily');
+    const opt = document.createElement('option');
+    opt.value = `'${fontName}'`;
+    opt.textContent = file.name.split('.')[0];
+    sel.appendChild(opt);
+    
+    sel.value = `'${fontName}'`;
+    applyCustomFont(`'${fontName}'`);
+  };
+  reader.readAsDataURL(file);
+}
+
+function applySelectionAlign(a){const sel=window.getSelection();if(!sel||sel.isCollapsed)return;getSelBlocks(sel.getRangeAt(0)).forEach(b=>b.style.textAlign=a);selTb.style.display='none';sel.removeAllRanges();saveState()}
+function applySelectionDir(d){const sel=window.getSelection();if(!sel||sel.isCollapsed)return;getSelBlocks(sel.getRangeAt(0)).forEach(b=>{b.style.direction=d;b.style.textAlign=d==='rtl'?'right':'left'});selTb.style.display='none';sel.removeAllRanges();saveState()}
 function getSelBlocks(range){
   const bt=new Set(['P','H1','H2','H3','H4','H5','H6','LI','BLOCKQUOTE','TD','TH','DIV','SECTION']),blocks=[],seen=new Set();
   let node=range.startContainer;
@@ -450,7 +621,6 @@ function openImgModal(){
   document.getElementById('imgAlignInput').value='right';
   const p=document.getElementById('imgPreview');p.style.display='none';p.src='';
   openModal('imgModal');
-  // focus the drop zone shortly after opening so Ctrl+V works immediately
   setTimeout(()=>{const dzEl=document.getElementById('dropZone');if(dzEl)dzEl.focus()},60);
 }
 
@@ -462,12 +632,9 @@ dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover'
 function loadImgFile(file){const r=new FileReader();r.onload=ev=>{imgBase64=ev.target.result;const p=document.getElementById('imgPreview');p.src=imgBase64;p.style.display='block';document.getElementById('imgUrlInput').value=''};r.readAsDataURL(file)}
 document.getElementById('imgUrlInput').addEventListener('input',function(){if(this.value.trim()){imgBase64=null;const p=document.getElementById('imgPreview');p.src=this.value.trim();p.style.display='block'}});
 
-// ---- Generic clipboard-paste support for any drop-zone with class "paste-target" ----
-// onImage(dataUrl) is called with the base64 data URL of the pasted image.
 function bindPasteToDropZone(zoneEl, onImage){
   if(!zoneEl) return;
   zoneEl.addEventListener('paste', e=>handlePasteEvent(e,zoneEl,onImage));
-  // also catch paste when focus is inside the modal but not exactly on the zone
   zoneEl.addEventListener('click',()=>zoneEl.focus());
 }
 function handlePasteEvent(e,zoneEl,onImage){
@@ -488,16 +655,13 @@ function handlePasteEvent(e,zoneEl,onImage){
     }
   }
 }
-// Also listen at document level while a modal with a paste-target is open,
-// so the user doesn't have to click exactly inside the small drop-zone first.
+
 document.addEventListener('paste', e=>{
   const openModalBox=document.querySelector('.modal-backdrop.open .paste-target');
   if(!openModalBox) return;
-  // route to the correct handler based on which zone is in the currently-open modal
   if(openModalBox.id==='dropZone') handlePasteEvent(e,openModalBox,dataUrl=>{imgBase64=dataUrl;const p=document.getElementById('imgPreview');p.src=dataUrl;p.style.display='block';document.getElementById('imgUrlInput').value=''});
   else if(openModalBox.id==='coverDropZone') handlePasteEvent(e,openModalBox,dataUrl=>{coverImgData=dataUrl;coverImgPreview.src=dataUrl;coverImgPreview.style.display='block';coverImgUrlInput.value='';removeCoverImgBtn.style.display='inline-block';refreshCoverFitVisibility()});
 });
-
 
 function confirmInsertImage(){
   const url=imgBase64||document.getElementById('imgUrlInput').value.trim();
@@ -534,13 +698,13 @@ function buildImgWrapper(url,width,align){
   } else {
     preview.appendChild(wrapper);
   }
+  saveState();
 }
 
-function resizeImg(r){r.closest('.img-wrapper').querySelector('img').style.width=r.value+'px'}
-function alignImg(btn,a){btn.closest('.img-wrapper').querySelector('.img-inner').className='img-inner align-'+a}
-function removeImg(btn){btn.closest('.img-wrapper').remove()}
+function resizeImg(r){r.closest('.img-wrapper').querySelector('img').style.width=r.value+'px';saveState()}
+function alignImg(btn,a){btn.closest('.img-wrapper').querySelector('.img-inner').className='img-inner align-'+a;saveState()}
+function removeImg(btn){btn.closest('.img-wrapper').remove();saveState()}
 
-// Also support pasting an image directly into the preview/editor itself (outside modals)
 preview.addEventListener('paste', e=>{
   const items=(e.clipboardData||window.clipboardData)?.items;
   if(!items) return;
@@ -561,8 +725,8 @@ preview.addEventListener('paste', e=>{
   }
 });
 
-// ---- Cover image upload (device or URL) ----
-let coverImgData=null; // holds base64 or URL string actually used for the cover
+// Cover image upload (device or URL)
+let coverImgData=null; 
 const coverImgFileInput=document.getElementById('coverImgFileInput');
 const coverDropZone=document.getElementById('coverDropZone');
 const coverImgPreview=document.getElementById('coverImgPreview');
@@ -583,6 +747,7 @@ function loadCoverImgFile(file){
     coverImgUrlInput.value='';
     removeCoverImgBtn.style.display='inline-block';
     refreshCoverFitVisibility();
+    saveState();
   };
   r.readAsDataURL(file);
 }
@@ -595,6 +760,7 @@ coverImgUrlInput.addEventListener('input',function(){
     coverImgFileInput.value='';
     removeCoverImgBtn.style.display='inline-block';
     refreshCoverFitVisibility();
+    saveState();
   } else if(!coverImgFileInput.files[0]){
     clearCoverImg();
   }
@@ -607,10 +773,9 @@ function clearCoverImg(){
   coverImgPreview.style.display='none';
   removeCoverImgBtn.style.display='none';
   refreshCoverFitVisibility();
+  saveState();
 }
 
-// ---- "Fit Page" toggle: show/hide the controls that only make sense
-// when the cover image should cover the whole page vs. sit small/inset ----
 function toggleCoverFit(){
   const fit=document.getElementById('coverFitPage').checked;
   document.getElementById('coverBgFieldsWrap').style.display = fit ? 'none' : 'block';
@@ -619,13 +784,10 @@ function toggleCoverFit(){
   document.getElementById('coverOverlayToggleRow').style.display = fit ? 'flex' : 'none';
 }
 
-// Show the "Fit Page" toggle only once an image has actually been provided —
-// it has no meaning without an image.
 function refreshCoverFitVisibility(){
   const hasImg = !!coverImgData;
   document.getElementById('coverFitRow').style.display = hasImg ? 'flex' : 'none';
   if(!hasImg){
-    // no image -> force back to the normal text-cover layout
     document.getElementById('coverFitPage').checked=false;
     toggleCoverFit();
   }
@@ -638,15 +800,18 @@ function buildCoverPage(){
   coverPage.className='';
   coverPage.style.cssText='';
   coverPage.innerHTML='';
-  if(!wantCover) return;
+  if(!wantCover) return; 
+
+  coverPage.classList.add('active');
 
   const title=document.getElementById('coverTitle').value.trim();
   const sub=document.getElementById('coverSubtitle').value.trim();
   const fitPage = document.getElementById('coverFitPage').checked && !!coverImgData;
 
   if(fitPage){
-    const fit=document.getElementById('coverFullFit').value; // cover | contain
-    coverPage.className='full-image-cover'+(fit==='contain'?' fit-contain':'');
+    const fit=document.getElementById('coverFullFit').value; 
+    coverPage.classList.add('full-image-cover');
+    if(fit==='contain') coverPage.classList.add('fit-contain');
     const img=document.createElement('img');
     img.className='cover-full-img';img.src=coverImgData;img.alt='';
     coverPage.appendChild(img);
@@ -681,7 +846,7 @@ function doPrint(){
   if(!styleEl){styleEl=document.createElement('style');styleEl.id='pnStyle';document.head.appendChild(styleEl)}
 
   if(wantPN){
-    const pos=document.getElementById('pnPos').value; // left|center|right
+    const pos=document.getElementById('pnPos').value; 
     const font=document.getElementById('pnFont').value;
     const size=document.getElementById('pnSize').value;
     const italic=document.getElementById('pnItalic').checked?'italic':'normal';
@@ -690,21 +855,10 @@ function doPrint(){
     const marginMM=parseFloat(document.getElementById('pnMargin').value)||8;
     const skipCover=document.getElementById('pnSkipCover').checked;
 
-    // Base page bottom-margin: must be at least the page-number's requested
-    // distance from the paper edge, PLUS enough room for the number's own
-    // text height (font-size in pt converted to mm, with extra breathing
-    // room) so the glyph itself doesn't get clipped against the edge of
-    // that reserved margin strip.
     const sizePt = parseFloat(size) || 10;
-    const textHeightMM = (sizePt * 0.3528) * 1.6; // pt->mm, plus ~60% line-height buffer
+    const textHeightMM = (sizePt * 0.3528) * 1.6; 
     const pageBottomMargin = Math.max(marginMM + textHeightMM, marginMM + 6, 10);
 
-    // NOTE on properties: inside a page-margin box (@bottom-center etc.)
-    // the "margin" property is NOT supported by browsers — only padding,
-    // border, color, font-*, text-align, vertical-align, content, etc.
-    // Distance from the physical bottom edge of the paper is controlled by
-    // the @page margin itself (how tall the bottom margin area is), and the
-    // page-number is then vertically centered inside that reserved area.
     let rule = `
       @page{
         margin: 15mm 15mm ${pageBottomMargin}mm 15mm;
@@ -721,9 +875,6 @@ function doPrint(){
     `;
 
     if(wantCover && skipCover){
-      // Chromium supports :first to clear the margin box only on the very
-      // first printed page (our cover), and supports resetting the CSS
-      // counter "page" so the next page starts the visible numbering at 1.
       rule += `
         @page :first{
           @bottom-${pos}{ content: normal; }
@@ -739,6 +890,26 @@ function doPrint(){
 
   closeModal('pdfModal');
   setTimeout(()=>window.print(),80);
+}
+
+// Bi-directional synchronizer
+function syncMarkdownAndPreview() {
+  const clone = preview.cloneNode(true);
+  
+  // Extract formulas back to clean math format for input synchronization
+  clone.querySelectorAll('.katex-html').forEach(el => el.remove());
+  clone.querySelectorAll('annotation[encoding="application/x-tex"]').forEach(el => {
+    const formulaText = el.textContent;
+    const parentSpan = el.closest('.katex');
+    if (parentSpan) {
+      const isDisplay = parentSpan.classList.contains('katex-display');
+      parentSpan.replaceWith(isDisplay ? `$$${formulaText}$$` : `$${formulaText}$`);
+    }
+  });
+
+  input.value = clone.innerHTML;
+  renderPreview();
+  saveState();
 }
 
 // Word export
@@ -766,11 +937,37 @@ async function exportWord(){
   const blob=await Packer.toBlob(doc);saveAs(blob,'document.docx');
 }
 
-function clearAll(){input.value='';preview.innerHTML=''}
+function clearAll(){
+  input.value='';
+  preview.innerHTML='';
+  saveState();
+}
 
-// Sample
-input.value=`# جزوه نمونه\n\n## معادلات ریاضی\nفرمول انرژی اینشتین: $E = mc^2$\n\nمعادله دیفرانسیل:\n$$\\\\frac{d^2y}{dx^2} + \\\\omega^2 y = 0$$\n\n## جدول نمونه\n\n| لایه | مقاومت کششی | عروق |\n|------|-------------|------|\n| اپیدرم | ندارد | آواسکولار |\n| درم | بالا | پرعروق |\n\n## لیست\n- نکته اول\n- نکته دوم\n- نکته سوم\n\n> این یک blockquote است.\n`;
-renderPreview();
+// Initial state and startup binds
+window.addEventListener('DOMContentLoaded', () => {
+  input.value=`# جزوه نمونه\n\n## معادلات ریاضی\nفرمول انرژی اینشتین: $E = mc^2$\n\nمعادله دیفرانسیل:\n$$\\\\frac{d^2y}{dx^2} + \\\\omega^2 y = 0$$\n\n## جدول نمونه\n\n| لایه | مقاومت کششی | عروق |\n|------|-------------|------|\n| اپیدرم | ندارد | آواسکولار |\n| درم | بالا | پرعروق |\n\n## لیست\n- نکته اول\n- نکته دوم\n- نکته سوم\n\n> این یک blockquote است.\n`;
+  renderPreview();
+  saveState();
+
+  bindPasteToDropZone(document.getElementById('dropZone'), dataUrl => {
+    imgBase64 = dataUrl;
+    const p = document.getElementById('imgPreview');
+    p.src = dataUrl;
+    p.style.display = 'block';
+    document.getElementById('imgUrlInput').value = '';
+    saveState();
+  });
+
+  bindPasteToDropZone(document.getElementById('coverDropZone'), dataUrl => {
+    coverImgData = dataUrl;
+    coverImgPreview.src = dataUrl;
+    coverImgPreview.style.display = 'block';
+    coverImgUrlInput.value = '';
+    removeCoverImgBtn.style.display = 'inline-block';
+    refreshCoverFitVisibility();
+    saveState();
+  });
+});
 </script>
 </body>
 </html>
