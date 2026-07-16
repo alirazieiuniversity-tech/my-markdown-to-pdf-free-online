@@ -10,6 +10,8 @@
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<!-- کتابخانه برای رسم نمودارهای گرافیکی Mermaid -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f0f2f5;color:#222;direction:rtl}
@@ -35,6 +37,62 @@ button:hover{opacity:.85}
 .resizer:hover{background:#1e3a5f}
 .resizer::before{content:'⋮';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#888;font-size:1.1rem;letter-spacing:-4px}
 .panel-header{background:#f8f9fa;padding:9px 14px;font-weight:bold;font-size:.88rem;border-bottom:1px solid #e5e5e5;color:#555;display:flex;align-items:center;gap:6px}
+
+/* استایل پنل پیشرفته جستجو و ویرایش کلمات */
+.search-panel {
+  display: none;
+  background: #fcfcfc;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 14px 18px;
+  flex-direction: column;
+  gap: 12px;
+}
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+.search-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.search-field label {
+  font-size: 0.76rem;
+  color: #4a5568;
+  font-weight: 600;
+}
+.search-field input[type="text"], .search-field select {
+  padding: 6px 10px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  outline: none;
+}
+.search-field input:focus, .search-field select:focus {
+  border-color: #1e3a5f;
+}
+.search-format-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 10px;
+}
+.search-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  user-select: none;
+}
+.search-checkbox input {
+  cursor: pointer;
+}
+
 #selectionToolbar{display:none;position:fixed;z-index:9999;background:#1e3a5f;border-radius:8px;padding:6px 8px;gap:6px;box-shadow:0 4px 20px rgba(0,0,0,.3);align-items:center}
 #selectionToolbar button{background:rgba(255,255,255,.15);color:white;border-radius:5px;padding:5px 8px;font-size:.8rem}
 #selectionToolbar button:hover{background:rgba(255,255,255,.3)}
@@ -60,6 +118,17 @@ button:hover{opacity:.85}
 #preview hr{border:none;border-top:2px solid #ddd;margin:16px 0}
 #preview strong{color:#1e3a5f}
 #preview img{max-width:100%;border-radius:6px}
+
+/* استایل نمودارهای گرافیکی Mermaid */
+.mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
 
 /* IMAGE WRAPPER — toolbar lives INSIDE at top, padding-top makes space */
 .img-wrapper{position:relative;display:block;margin:12px 0;padding-top:38px}
@@ -136,7 +205,7 @@ input:checked+.slider:before{transform:translateX(-20px)}
 #coverPage .cover-img{max-width:300px;max-height:300px;border-radius:12px;object-fit:cover}
 
 @media print{
-  header,.panel:first-child,.resizer,#selectionToolbar,.img-toolbar,.panel-header{display:none!important}
+  header,.panel:first-child,.resizer,#selectionToolbar,.img-toolbar,.panel-header,.search-panel{display:none!important}
   body,html{background:white!important;margin:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
   *{print-color-adjust:exact;-webkit-print-color-adjust:exact}
   .container{display:block;padding:0;height:auto}
@@ -161,7 +230,9 @@ input:checked+.slider:before{transform:translateX(-20px)}
 </head>
 <body>
 
+<!-- فیلدهای آپلود پنهان -->
 <input type="file" id="fontFileInput" accept=".ttf,.woff,.woff2,.otf" style="display:none" onchange="loadUploadedFont(event)">
+<input type="file" id="projectFileInput" accept=".jzv" style="display:none" onchange="loadProjectFromInput(event)">
 
 <div id="selectionToolbar">
   <button onclick="applyStyle('bold')" title="ضخیم"><b>B</b></button>
@@ -378,6 +449,10 @@ input:checked+.slider:before{transform:translateX(-20px)}
 <header>
   <h1>📄 مبدل Markdown — PDF و Word</h1>
   <div class="btn-group">
+    <!-- افزودن امکان ذخیره/بازیابی فایل قابل ویرایش پروژه -->
+    <button onclick="exportProject()" style="background:#e67e22; color:white;" title="دانلود سورس قابل ویرایش پروژه">💾 خروجی پروژه (.jzv)</button>
+    <button onclick="triggerProjectUpload()" style="background:#d35400; color:white;" title="بارگذاری پروژه نیمه‌کاره">📂 بارگذاری پروژه</button>
+    <div class="separator"></div>
     <button class="btn-pdf"  onclick="openModal('pdfModal')">⬇ PDF</button>
     <button class="btn-word" onclick="exportWord()">⬇ Word</button>
     <div class="separator"></div>
@@ -407,17 +482,86 @@ input:checked+.slider:before{transform:translateX(-20px)}
   <div class="panel" id="rightPanel">
     <div class="panel-header">
       👁 پیش‌نمایش
-      <span style="font-size:.75rem;color:#999;font-weight:normal;margin-right:auto">💡 متن را انتخاب کنید تا تراز‌بندی انتخابی ظاهر شود</span>
+      <button onclick="toggleSearchPanel()" style="background:#2c3e50; color:white; font-size:.78rem; padding:4px 10px; border-radius:5px; margin-right: auto;">🔍 ابزار ویرایش و جایگزینی پیشرفته</button>
+      <span style="font-size:.75rem;color:#999;font-weight:normal;margin-right:10px">💡 برای تراز انفرادی، متن را انتخاب کنید</span>
     </div>
+
+    <!-- پنل پیشرفته جستجو و استایل‌دهی شیک -->
+    <div class="search-panel" id="searchPanel">
+      <div class="search-grid">
+        <div class="search-field">
+          <label>کلمه مورد نظر جهت جستجو:</label>
+          <input type="text" id="findInput" placeholder="مثال: نکته">
+        </div>
+        <div class="search-field">
+          <label>جایگزینی با کلمه جدید (اختیاری):</label>
+          <input type="text" id="replaceInput" placeholder="مثال: توجه">
+        </div>
+        <div class="search-field">
+          <label>تغییر فونت:</label>
+          <select id="findFont">
+            <option value="">پیش‌فرض</option>
+            <option value="'Segoe UI', Tahoma, sans-serif">Segoe UI</option>
+            <option value="'Vazirmatn', sans-serif">وزیرمتن</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="Georgia, serif">Georgia</option>
+          </select>
+        </div>
+        <div class="search-field">
+          <label>اندازه فونت:</label>
+          <input type="text" id="findSize" placeholder="مثال: 18px یا 1.2rem">
+        </div>
+        <div class="search-field">
+          <label>رنگ آمیزی:</label>
+          <div style="display:flex; gap:6px;">
+            <input type="color" id="findColor" value="#e74c3c" style="width:30px; height:32px; border:1px solid #ccc; cursor:pointer;">
+            <input type="text" id="findColorHex" value="#e74c3c" style="width:80px; font-size:0.75rem;" oninput="document.getElementById('findColor').value=this.value">
+          </div>
+        </div>
+      </div>
+      
+      <div class="search-format-row">
+        <label class="search-checkbox"><input type="checkbox" id="findBold"> <b>B</b> ضخیم (Bold)</label>
+        <label class="search-checkbox"><input type="checkbox" id="findItalic"> <i>I</i> کج (Italic)</label>
+        <label class="search-checkbox"><input type="checkbox" id="findUnderline"> <u>U</u> خط‌دار (Underline)</label>
+        <div class="separator" style="background:#ddd; height:20px;"></div>
+        <div class="search-field" style="flex-direction:row; align-items:center; gap:6px;">
+          <label style="margin:0;">تراز بلاک:</label>
+          <select id="findAlign" style="padding:3px 6px;">
+            <option value="">بدون تغییر</option>
+            <option value="right">راست‌چین</option>
+            <option value="center">وسط‌چین</option>
+            <option value="left">چپ‌چین</option>
+          </select>
+        </div>
+        <div class="search-field" style="flex-direction:row; align-items:center; gap:6px;">
+          <label style="margin:0;">جهت متن:</label>
+          <select id="findDir" style="padding:3px 6px;">
+            <option value="">بدون تغییر</option>
+            <option value="rtl">RTL (راست به چپ)</option>
+            <option value="ltr">LTR (چپ به راست)</option>
+          </select>
+        </div>
+        <button onclick="applyStyleToSearchMatches()" style="background:#27ae60; color:white; padding:6px 14px; margin-right:auto; font-weight:bold;">✅ اعمال تغییرات و جایگزینی</button>
+      </div>
+    </div>
+
     <div id="preview" contenteditable="true" spellcheck="false"></div>
   </div>
 </div>
 
 <script>
+// پیکربندی اولیه ابزار ترسیم نمودارهای گرافیکی Mermaid
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'default',
+  securityLevel: 'loose'
+});
+
 marked.setOptions({breaks:true,gfm:true});
 const input=document.getElementById('mdInput'),preview=document.getElementById('preview');
 
-// Undo/Redo State Manager
+// مدیریت تاریخچه تغییرات
 const historyStack = [];
 let historyIndex = -1;
 const maxHistory = 50;
@@ -456,7 +600,7 @@ function loadHistoryState(state) {
   preview.innerHTML = state.preview;
 }
 
-// Bind keyboard shortcuts
+// کیبوردهای میانبر
 document.addEventListener('keydown', e => {
   if (e.ctrlKey && e.key.toLowerCase() === 'z') {
     e.preventDefault();
@@ -468,24 +612,213 @@ document.addEventListener('keydown', e => {
   }
 });
 
+// پردازش و رندر کدهای Mermaid
+async function processMermaidDiagrams() {
+  const blocks = preview.querySelectorAll('pre code.language-mermaid');
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+    const code = block.textContent;
+    const parent = block.parentElement; 
+
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.setAttribute('data-original-code', code); 
+    div.textContent = code;
+    
+    parent.parentNode.replaceChild(div, parent);
+  }
+  try {
+    if (preview.querySelectorAll('.mermaid').length > 0) {
+      await mermaid.run({
+        nodes: preview.querySelectorAll('.mermaid')
+      });
+    }
+  } catch (err) {
+    console.error("خطا در پردازش نمودار:", err);
+  }
+}
+
+// رندر با تاخیر (Debounce)
+let renderTimeout;
 function renderPreview(){
   preview.innerHTML=marked.parse(input.value);
   renderMathInElement(preview,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false});
+  processMermaidDiagrams();
 }
 
 input.addEventListener('input', () => {
-  renderPreview();
-  saveState();
+  clearTimeout(renderTimeout);
+  renderTimeout = setTimeout(() => {
+    renderPreview();
+    saveState();
+  }, 400); 
 });
 
-// Resizer
+// باز و بسته کردن پنل جستجو و ویرایش کلمات
+function toggleSearchPanel() {
+  const panel = document.getElementById('searchPanel');
+  panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+}
+
+// ابزار جستجو، تغییر نام، و استایل دهی پیشرفته بدون صدمه زدن به ریاضی یا تصاویر
+function applyStyleToSearchMatches() {
+  const term = document.getElementById('findInput').value.trim();
+  if (!term) {
+    alert('لطفاً کلمه‌ای برای جستجو وارد کنید.');
+    return;
+  }
+  const replaceTerm = document.getElementById('replaceInput').value.trim();
+  
+  const styles = {
+    color: document.getElementById('findColor').value,
+    fontSize: document.getElementById('findSize').value.trim(),
+    fontFamily: document.getElementById('findFont').value,
+    bold: document.getElementById('findBold').checked,
+    italic: document.getElementById('findItalic').checked,
+    underline: document.getElementById('findUnderline').checked,
+    align: document.getElementById('findAlign').value,
+    dir: document.getElementById('findDir').value
+  };
+
+  highlightAndReplaceSearchTerm(preview, term, replaceTerm, styles);
+  
+  // سینک و ثبت خودکار در تاریخچه جهت ماندگاری تغییرات
+  syncMarkdownAndPreview();
+}
+
+function highlightAndReplaceSearchTerm(root, term, replaceTerm, styles) {
+  const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+  const textNodes = [];
+  let node;
+  while (node = walk.nextNode()) {
+    const parent = node.parentElement;
+    if (parent && (
+        parent.closest('.katex') || 
+        parent.closest('.mermaid') || 
+        parent.tagName === 'SCRIPT' || 
+        parent.tagName === 'STYLE' || 
+        parent.closest('code') || 
+        parent.closest('pre')
+    )) {
+      continue;
+    }
+    textNodes.push(node);
+  }
+
+  const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedTerm})`, 'gi');
+  const targetText = replaceTerm !== "" ? replaceTerm : term;
+
+  for (let i = textNodes.length - 1; i >= 0; i--) {
+    const tNode = textNodes[i];
+    const text = tNode.nodeValue;
+    if (regex.test(text)) {
+      const fragment = document.createDocumentFragment();
+      const parts = text.split(regex);
+      parts.forEach(part => {
+        if (part.toLowerCase() === term.toLowerCase()) {
+          const span = document.createElement('span');
+          span.textContent = targetText;
+          
+          if (styles.color) span.style.color = styles.color;
+          if (styles.fontSize) span.style.fontSize = styles.fontSize;
+          if (styles.fontFamily) span.style.fontFamily = styles.fontFamily;
+          if (styles.bold) span.style.fontWeight = 'bold';
+          if (styles.italic) span.style.fontStyle = 'italic';
+          if (styles.underline) span.style.textDecoration = 'underline';
+          
+          // اعمال جهت‌گیری یا تراز در صورت درخواست کاربر به نزدیک‌ترین سطح بلوک متنی
+          if (styles.align || styles.dir) {
+            let parentBlock = tNode.parentElement;
+            const blockTags = ['P','H1','H2','H3','H4','H5','H6','LI','BLOCKQUOTE','TD','TH','DIV'];
+            while (parentBlock && parentBlock !== root && !blockTags.includes(parentBlock.tagName)) {
+              parentBlock = parentBlock.parentElement;
+            }
+            if (parentBlock && parentBlock !== root) {
+              if (styles.align) parentBlock.style.textAlign = styles.align;
+              if (styles.dir) {
+                parentBlock.style.direction = styles.dir;
+                if (!styles.align) parentBlock.style.textAlign = styles.dir === 'rtl' ? 'right' : 'left';
+              }
+            }
+          }
+
+          fragment.appendChild(span);
+        } else {
+          fragment.appendChild(document.createTextNode(part));
+        }
+      });
+      tNode.parentNode.replaceChild(fragment, tNode);
+    }
+  }
+}
+
+// بازیابی و ذخیره‌سازی جامع فایل پروژه ویرایشگر (.jzv)
+function exportProject() {
+  const projectData = {
+    version: "2.0",
+    md: input.value,
+    preview: preview.innerHTML,
+    globalAlign: preview.style.textAlign,
+    globalDir: preview.style.direction
+  };
+  const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: "application/json" });
+  saveAs(blob, "draft_project.jzv");
+}
+
+function triggerProjectUpload() {
+  document.getElementById('projectFileInput').click();
+}
+
+function loadProjectFromInput(e) {
+  const file = e.target.files[0];
+  if(file) loadProjectFile(file);
+}
+
+function loadProjectFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (data.md !== undefined && data.preview !== undefined) {
+        input.value = data.md;
+        preview.innerHTML = data.preview;
+        if (data.globalAlign) preview.style.textAlign = data.globalAlign;
+        if (data.globalDir) preview.style.direction = data.globalDir;
+        
+        // همگام‌سازی معادلات ریاضی مجدد
+        renderMathInElement(preview,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false});
+        
+        saveState();
+        alert('پروژه با موفقیت بازیابی شد. اکنون می‌توانید تغییرات را ادامه دهید.');
+      } else {
+        alert('فرمت فایل نامعتبر است.');
+      }
+    } catch (err) {
+      alert('خطا در پردازش فایل پروژه: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// فعالسازی قابلیت Drag and Drop فایل پروژه روی کل صفحه برنامه
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.jzv')) {
+    loadProjectFile(file);
+  }
+});
+
+// تغییر اندازه پنل‌ها
 const resizer=document.getElementById('resizer'),lp=document.getElementById('leftPanel'),rp=document.getElementById('rightPanel'),cont=document.querySelector('.container');
 let isR=false;
 resizer.addEventListener('mousedown',()=>{isR=true;document.body.style.cursor='ew-resize';document.body.style.userSelect='none'});
 document.addEventListener('mousemove',e=>{if(!isR)return;const r=cont.getBoundingClientRect();let p=((e.clientX-r.left)/r.width)*100;p=Math.max(20,Math.min(80,p));lp.style.flex=`0 0 ${p}%`;rp.style.flex=`0 0 ${100-p}%`});
 document.addEventListener('mouseup',()=>{if(isR){isR=false;document.body.style.cursor='';document.body.style.userSelect=''}});
 
-// Global align/dir
+// تراز بندی سراسری
 function setGlobalAlign(a){
   preview.style.textAlign=a;
   input.style.textAlign=a;
@@ -499,7 +832,7 @@ function setDir(d){
   saveState();
 }
 
-// Selection toolbar
+// نمایش جعبه ابزار انتخاب متن
 const selTb=document.getElementById('selectionToolbar');
 preview.addEventListener('mouseup',showSelTb);
 preview.addEventListener('keyup',showSelTb);
@@ -515,7 +848,7 @@ function showSelTb(){
 }
 document.addEventListener('mousedown',e=>{if(!selTb.contains(e.target))selTb.style.display='none'});
 
-// Inline selective styling functions
+// اعمال سبک‌های مستقیم به بخش‌های انتخابی دستی
 function applyStyle(command) {
   document.execCommand(command, false, null);
   saveState();
@@ -597,19 +930,19 @@ function getSelBlocks(range){
 }
 function nextN(node,root){if(node.firstChild)return node.firstChild;while(node){if(node===root)return null;if(node.nextSibling)return node.nextSibling;node=node.parentNode}return null}
 
-// Modal helpers
+// متدهای مدیریت مودال‌ها
 function openModal(id){document.getElementById(id).classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
 
-// Toggle sub-fields
+// تغییر نمایش زیرشاخه‌های کنترل
 function toggleSub(cbId,fieldId){document.getElementById(fieldId).className='sub-fields'+(document.getElementById(cbId).checked?' on':'')}
 
-// Color sync
+// همگام سازی جعبه رنگ
 function syncColorPick(el,textId){document.getElementById(textId).value=el.value}
 function syncColorText(el,pickId){if(/^#[0-9a-fA-F]{6}$/.test(el.value))document.getElementById(pickId).value=el.value}
 
-// Image modal
+// مودال‌های کار با تصاویر
 let savedRange=null,imgBase64=null;
 function openImgModal(){
   const sel=window.getSelection();
@@ -725,7 +1058,7 @@ preview.addEventListener('paste', e=>{
   }
 });
 
-// Cover image upload (device or URL)
+// آپلود عکس کاور
 let coverImgData=null; 
 const coverImgFileInput=document.getElementById('coverImgFileInput');
 const coverDropZone=document.getElementById('coverDropZone');
@@ -793,7 +1126,7 @@ function refreshCoverFitVisibility(){
   }
 }
 
-// PDF print
+// رندر صفحه کاور در پرینت
 function buildCoverPage(){
   const coverPage=document.getElementById('coverPage');
   const wantCover=document.getElementById('coverToggle').checked;
@@ -892,27 +1225,7 @@ function doPrint(){
   setTimeout(()=>window.print(),80);
 }
 
-// Bi-directional synchronizer
-function syncMarkdownAndPreview() {
-  const clone = preview.cloneNode(true);
-  
-  // Extract formulas back to clean math format for input synchronization
-  clone.querySelectorAll('.katex-html').forEach(el => el.remove());
-  clone.querySelectorAll('annotation[encoding="application/x-tex"]').forEach(el => {
-    const formulaText = el.textContent;
-    const parentSpan = el.closest('.katex');
-    if (parentSpan) {
-      const isDisplay = parentSpan.classList.contains('katex-display');
-      parentSpan.replaceWith(isDisplay ? `$$${formulaText}$$` : `$${formulaText}$`);
-    }
-  });
-
-  input.value = clone.innerHTML;
-  renderPreview();
-  saveState();
-}
-
-// Word export
+// خروجی سند Word
 async function exportWord(){
   const{Document,Paragraph,TextRun,HeadingLevel,TableRow,TableCell,Table,WidthType,AlignmentType,Packer}=docx;
   const tmp=document.createElement('div');tmp.innerHTML=preview.innerHTML;
@@ -943,9 +1256,9 @@ function clearAll(){
   saveState();
 }
 
-// Initial state and startup binds
+// بارگذاری پیش‌فرض در شروع برنامه
 window.addEventListener('DOMContentLoaded', () => {
-  input.value=`# جزوه نمونه\n\n## معادلات ریاضی\nفرمول انرژی اینشتین: $E = mc^2$\n\nمعادله دیفرانسیل:\n$$\\\\frac{d^2y}{dx^2} + \\\\omega^2 y = 0$$\n\n## جدول نمونه\n\n| لایه | مقاومت کششی | عروق |\n|------|-------------|------|\n| اپیدرم | ندارد | آواسکولار |\n| درم | بالا | پرعروق |\n\n## لیست\n- نکته اول\n- نکته دوم\n- نکته سوم\n\n> این یک blockquote است.\n`;
+  input.value=`# جزوه نمونه با ابزارهای پیشرفته\n\n## نمودار گرافیکی Mermaid\n\n\`\`\`mermaid\ngraph TD\n    A[شروع مطالعه] --> B(یادداشت برداری)\n    B --> C{آیا کلمات کلیدی مهم هستند؟}\n    C -- بله --> D[هایلایت و تغییر استایل کلمه]\n    C -- خیر --> E[ادامه خواندن]\n    D --> F[موفقیت در امتحان]\n    E --> F\n\`\`\`\n\n## معادلات ریاضی\nفرمول انرژی اینشتین: $E = mc^2$\n\nمعادله دیفرانسیل:\n$$\\\\frac{d^2y}{dx^2} + \\\\omega^2 y = 0$$\n\n## جدول نمونه\n\n| لایه | مقاومت کششی | عروق |\n|------|-------------|------|\n| اپیدرم | ندارد | آواسکولار |\n| درم | بالا | پرعروق |\n\n## لیست\n- نکته اول این بخش بسیار مهم است\n- نکته دوم\n- نکته سوم\n\n> این یک blockquote است.\n`;
   renderPreview();
   saveState();
 
