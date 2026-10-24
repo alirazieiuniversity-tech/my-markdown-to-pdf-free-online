@@ -15,7 +15,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f0f2f5;color:#222;direction:rtl}
 
-/* ========== هدر اصلی ========== */
 header{background:#1e3a5f;color:white;padding:12px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 header h1{font-size:1.1rem;flex:1;white-space:nowrap}
 .btn-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
@@ -35,7 +34,6 @@ button:hover{opacity:.85}
 .btn-sync{background:#27ae60;color:white}
 .btn-sync.active{background:#f39c12;color:#1e3a5f}
 
-/* ========== چیدمان اصلی ========== */
 .container{display:flex;gap:0;padding:14px;height:calc(100vh - 64px);transition:height .2s}
 .panel{background:white;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.1);display:flex;flex-direction:column;overflow:hidden}
 .panel:first-of-type{flex:1}
@@ -45,25 +43,21 @@ button:hover{opacity:.85}
 .resizer::before{content:'⋮';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#888;font-size:1.1rem;letter-spacing:-4px}
 .panel-header{background:#f8f9fa;padding:9px 14px;font-weight:bold;font-size:.88rem;border-bottom:1px solid #e5e5e5;color:#555;display:flex;align-items:center;gap:6px}
 
-/* ========== 🔥 حالت فول‌ویو: هدر مخفی و پنل تمام صفحه ========== */
 body.fullview-active header{display:none !important}
 body.fullview-active .container{height:100vh;padding:8px}
 
-/* حالت تمام‌صفحه ورودی Markdown */
 .container.md-fullview #rightPanel,
 .container.md-fullview #resizer{display:none!important}
 .container.md-fullview #leftPanel{flex:1 1 100%!important;border-radius:10px}
 .container.md-fullview #leftPanel > .panel-header{display:none}
 .container.md-fullview #mdInput{font-size:1rem;line-height:2.1;padding:26px}
 
-/* حالت تمام‌صفحه پیش‌نمایش */
 .container.preview-fullview #leftPanel,
 .container.preview-fullview #resizer{display:none!important}
 .container.preview-fullview #rightPanel{flex:1 1 100%!important;border-radius:10px}
 .container.preview-fullview #rightPanel > .panel-header{display:none}
 .container.preview-fullview #preview{font-size:1.05rem;line-height:2.05;padding:24px}
 
-/* ========== نوار ابزار شناور (برای هر دو فول‌ویو) ========== */
 .fv-bar{
   display:none;
   background:linear-gradient(90deg,#1e3a5f 0%,#2c3e50 100%);
@@ -84,7 +78,6 @@ body.fullview-active .container{height:100vh;padding:8px}
 .fv-bar .tb-sep{width:1px;height:22px;background:rgba(255,255,255,.25);margin:0 4px}
 .fv-bar .fv-badge{font-size:.72rem;color:rgba(255,255,255,.72);margin-right:auto;padding-right:6px}
 
-/* ========== پنل جستجو و ویرایش ========== */
 .search-panel{display:none;background:#fcfcfc;border-bottom:2px solid #e2e8f0;padding:14px 18px;flex-direction:column;gap:12px}
 .search-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
 .search-field{display:flex;flex-direction:column;gap:4px}
@@ -120,6 +113,13 @@ body.fullview-active .container{height:100vh;padding:8px}
 #preview hr{border:none;border-top:2px solid #ddd;margin:16px 0}
 #preview strong{color:#1e3a5f}
 #preview img{max-width:100%;border-radius:6px}
+#preview .katex-display{margin:12px 0;overflow-x:auto;overflow-y:hidden}
+
+/* 🔥 محافظت از مودال‌های غیرقابل ویرایش */
+.mermaid-wrapper[contenteditable="false"],
+.img-wrapper[contenteditable="false"]{
+  user-select:none;
+}
 
 /* Mermaid */
 .mermaid-wrapper{position:relative;display:block;margin:16px 0;padding-top:38px}
@@ -127,8 +127,11 @@ body.fullview-active .container{height:100vh;padding:8px}
 .mermaid-wrapper:hover .mermaid-toolbar{display:flex}
 .mermaid-toolbar label{color:rgba(255,255,255,.92);font-size:.75rem;display:flex;align-items:center;gap:5px;white-space:nowrap}
 .mermaid-toolbar input[type=range]{width:120px;cursor:pointer;accent-color:#f39c12}
+.mermaid-toolbar input[type=number]{width:48px;padding:2px 4px;border-radius:4px;border:none;font-size:.75rem;text-align:center;background:rgba(255,255,255,.85);color:#222;outline:none}
 .mermaid-toolbar button{background:rgba(255,255,255,.2);color:white;padding:3px 9px;font-size:.75rem;border-radius:4px;white-space:nowrap}
 .mermaid-toolbar button:hover{background:rgba(255,255,255,.35)}
+.mermaid-toolbar button.edit{background:rgba(243,156,18,.85);color:#1e3a5f;font-weight:bold}
+.mermaid-toolbar button.edit:hover{background:#f39c12}
 .mermaid-toolbar .tb-sep{width:1px;height:20px;background:rgba(255,255,255,.25);margin:0 2px}
 .mermaid{display:flex;justify-content:center;margin:0;background:white;padding:12px;border-radius:0 0 8px 8px;border:1px solid #e2e8f0;border-top:none;overflow-x:auto}
 .mermaid svg{max-width:100%;height:auto;display:block;margin:0 auto;transition:max-width .15s}
@@ -142,11 +145,12 @@ body.fullview-active .container{height:100vh;padding:8px}
 .img-toolbar .del{background:rgba(231,76,60,.7)}
 .img-toolbar label{color:rgba(255,255,255,.85);font-size:.73rem;display:flex;align-items:center;gap:5px;white-space:nowrap}
 .img-toolbar input[type=range]{width:100px;cursor:pointer;accent-color:#f39c12}
+.img-toolbar input[type=number]{width:48px;padding:2px 4px;border-radius:4px;border:none;font-size:.75rem;text-align:center;background:rgba(255,255,255,.85);color:#222;outline:none}
 .img-toolbar .tb-sep{width:1px;height:20px;background:rgba(255,255,255,.25);margin:0 2px}
 .img-inner{display:flex;justify-content:flex-end}
 .img-inner.align-center{justify-content:center}
 .img-inner.align-left{justify-content:flex-start}
-.img-inner img{display:block;border-radius:4px;max-width:100%}
+.img-inner img{display:block;border-radius:4px}
 
 /* Modals */
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;align-items:center;justify-content:center}
@@ -170,7 +174,6 @@ body.fullview-active .container{height:100vh;padding:8px}
 .drop-zone.small{padding:12px}
 .remove-cover-img{display:inline-block;margin-top:6px;background:#ecf0f1;color:#c0392b;padding:4px 10px;border-radius:6px;font-size:.78rem;cursor:pointer;border:none}
 
-/* PDF modal */
 .pdf-sec-title{font-weight:bold;font-size:.88rem;color:#1e3a5f;border-bottom:1px solid #e0e8f4;padding-bottom:6px;margin:16px 0 10px}
 .toggle-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:#f8f9fa;margin-bottom:8px}
 .toggle-row label.lbl{flex:1;font-size:.88rem;color:#444;cursor:pointer;margin:0}
@@ -197,7 +200,6 @@ input:checked+.slider:before{transform:translateX(-20px)}
 .range-row input[type=range]{flex:1;accent-color:#1e3a5f}
 .range-row .rv{min-width:42px;text-align:left;font-size:.8rem;color:#555;font-family:'Courier New',monospace}
 
-/* Cover page at print */
 #coverPage{display:none;width:100%;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:60px 40px;gap:20px;page-break-after:always}
 #coverPage h1{font-size:2.2rem;font-weight:bold}
 #coverPage p{font-size:1.1rem;opacity:.85}
@@ -263,6 +265,10 @@ input:checked+.slider:before{transform:translateX(-20px)}
     <option value="32px">32px</option>
   </select>
   <div class="tb-sep"></div>
+  <label style="display:flex;align-items:center;gap:4px;color:white;font-size:.75rem;padding:0 4px;" onmousedown="saveColorSelection()">
+    🎨<input type="color" id="selTextColor" value="#e74c3c" onchange="applySelectionColor(this.value)" style="width:28px;height:26px;padding:0;border:1px solid rgba(255,255,255,.4);border-radius:4px;cursor:pointer;background:transparent">
+  </label>
+  <div class="tb-sep"></div>
   <button onclick="applySelectionAlign('right')">≡ راست</button>
   <button onclick="applySelectionAlign('center')">≡ وسط</button>
   <button onclick="applySelectionAlign('left')">≡ چپ</button>
@@ -271,7 +277,6 @@ input:checked+.slider:before{transform:translateX(-20px)}
   <button onclick="applySelectionDir('ltr')">LTR</button>
 </div>
 
-<!-- Image modal -->
 <div id="imgModal" class="modal-backdrop">
   <div class="modal-box">
     <h3>🖼 درج تصویر</h3>
@@ -284,7 +289,7 @@ input:checked+.slider:before{transform:translateX(-20px)}
       <img id="imgPreview" class="modal-preview" alt="">
     </div>
     <div class="msec">
-      <label>یا آدرس URL (اگر لینک مستقیم عکس باشد، به‌صورت خودکار به مارک‌داون تبدیل می‌شود):</label>
+      <label>یا آدرس URL:</label>
       <input type="text" id="imgUrlInput" placeholder="https://example.com/image.jpg">
     </div>
     <div class="mrow">
@@ -304,7 +309,24 @@ input:checked+.slider:before{transform:translateX(-20px)}
   </div>
 </div>
 
-<!-- PDF settings modal -->
+<!-- 🆕 مودال ویرایش Mermaid -->
+<div id="mermaidEditModal" class="modal-backdrop">
+  <div class="modal-box" style="width:640px">
+    <h3>✏️ ویرایش کد Mermaid</h3>
+    <div class="msec">
+      <label>کد نمودار را ویرایش کنید:</label>
+      <textarea id="mermaidEditCode" spellcheck="false" style="width:100%;min-height:280px;padding:12px;font-family:'Courier New',monospace;font-size:.85rem;border:1.5px solid #ddd;border-radius:8px;outline:none;direction:ltr;text-align:left;resize:vertical;line-height:1.6"></textarea>
+    </div>
+    <div style="background:#eef4fb;border:1px solid #bce0fd;border-radius:8px;padding:10px 12px;font-size:.78rem;color:#1e3a5f;line-height:1.7">
+      💡 پس از ذخیره، نمودار با تنظیمات عرض قبلی دوباره رندر می‌شود.
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('mermaidEditModal')">انصراف</button>
+      <button class="btn-confirm" onclick="saveMermaidEdit()">✅ ذخیره و رندر</button>
+    </div>
+  </div>
+</div>
+
 <div id="pdfModal" class="modal-backdrop">
   <div class="modal-box">
     <h3>⚙️ تنظیمات PDF</h3>
@@ -346,7 +368,7 @@ input:checked+.slider:before{transform:translateX(-20px)}
 
       <div class="toggle-row" id="coverFitRow" style="display:none">
         <label class="lbl" for="coverFitPage">عکس تمام صفحه شود (Fit Page)
-          <span class="lbl-hint">کل صفحه‌ی کاور را همین عکس می‌پوشاند؛ رنگ پس‌زمینه و حالت کوچک نادیده گرفته می‌شود</span>
+          <span class="lbl-hint">کل صفحه‌ی کاور را همین عکس می‌پوشاند</span>
         </label>
         <label class="switch"><input type="checkbox" id="coverFitPage" onchange="toggleCoverFit()"><span class="slider"></span></label>
       </div>
@@ -354,14 +376,12 @@ input:checked+.slider:before{transform:translateX(-20px)}
       <div id="coverFitCropRow" class="msec" style="display:none">
         <label>نحوه‌ی پر کردن صفحه:</label>
         <select id="coverFullFit">
-          <option value="cover">پوشش کامل (Crop در صورت نیاز) — پیشنهادی</option>
+          <option value="cover">پوشش کامل (Crop در صورت نیاز)</option>
           <option value="contain">کل عکس دیده شود (بدون برش)</option>
         </select>
       </div>
       <div class="toggle-row" id="coverOverlayToggleRow" style="display:none;margin-bottom:0">
-        <label class="lbl" for="coverFullOverlayText">نوشتن عنوان روی عکس
-          <span class="lbl-hint">عنوان و زیرعنوانی که بالا نوشتید، روی تصویر نمایش داده می‌شود</span>
-        </label>
+        <label class="lbl" for="coverFullOverlayText">نوشتن عنوان روی عکس</label>
         <label class="switch"><input type="checkbox" id="coverFullOverlayText"><span class="slider"></span></label>
       </div>
     </div>
@@ -424,18 +444,12 @@ input:checked+.slider:before{transform:translateX(-20px)}
         </div>
       </div>
       <div class="toggle-row" style="margin-bottom:0">
-        <label class="lbl" for="pnSkipCover">صفحه کاور شماره نخورد (شمارش از صفحه بعد، با عدد ۱)
-          <span class="lbl-hint">کاور عملاً صفحه‌ی صفر و بدون شماره‌ی قابل‌مشاهده در نظر گرفته می‌شود؛ صفحه‌ی بعدی با عدد ۱ شروع می‌شود</span>
-        </label>
+        <label class="lbl" for="pnSkipCover">صفحه کاور شماره نخورد</label>
         <label class="switch"><input type="checkbox" id="pnSkipCover" checked><span class="slider"></span></label>
       </div>
       <div style="background:#fff7e6;border:1px solid #f3d9a4;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:.78rem;color:#7a5b1e;line-height:1.7">
-        ⚠️ <b>نکته‌ی مهم:</b> در پنجره‌ی چاپ Chrome، روی «More settings» کلیک کنید و گزینه‌ی <b>Margins</b> را روی <b>None</b> بگذارید. اگر روی Default بماند، خود Chrome حاشیه‌ی خودش را به‌جای تنظیمات این برنامه اعمال می‌کند و فاصله‌ی شماره صفحه درست دیده نمی‌شود.
+        ⚠️ در پنجره‌ی چاپ Chrome، Margins را روی <b>None</b> بگذارید.
       </div>
-    </div>
-
-    <div style="background:#eef4fb;border:1px solid #bce0fd;border-radius:8px;padding:10px 12px;margin-top:12px;font-size:.78rem;color:#1e3a5f;line-height:1.7">
-      💾 <b>انتخاب مسیر ذخیره‌سازی PDF:</b> پس از کلیک روی دکمه چاپ زیر، در پنجره سیستم بازشده، بخش Destination را بر روی <b>Save as PDF</b> قرار دهید. بعد از زدن دکمه Save، مرورگر به‌صورت خودکار فولدری را برای ذخیره‌سازی از شما سؤال خواهد کرد.
     </div>
 
     <div class="modal-btns" style="margin-top:22px">
@@ -447,12 +461,11 @@ input:checked+.slider:before{transform:translateX(-20px)}
 
 <div id="coverPage"></div>
 
-<!-- ========== هدر اصلی (در حالت فول‌ویو کاملاً مخفی می‌شود) ========== -->
 <header id="mainHeader">
   <h1>📄 مبدل Markdown — PDF و Word</h1>
   <div class="btn-group">
-    <button onclick="exportProject()" style="background:#e67e22; color:white;" title="دانلود سورس قابل ویرایش پروژه (امکان انتخاب پوشه دلخواه)">💾 خروجی پروژه (.jzv)</button>
-    <button onclick="triggerProjectUpload()" style="background:#d35400; color:white;" title="بارگذاری پروژه نیمه‌کاره">📂 بارگذاری پروژه</button>
+    <button onclick="exportProject()" style="background:#e67e22; color:white;">💾 خروجی پروژه (.jzv)</button>
+    <button onclick="triggerProjectUpload()" style="background:#d35400; color:white;">📂 بارگذاری پروژه</button>
     <div class="separator"></div>
     <button class="btn-pdf"  onclick="openModal('pdfModal')">⬇ PDF</button>
     <button class="btn-word" onclick="exportWord()">⬇ Word</button>
@@ -466,13 +479,13 @@ input:checked+.slider:before{transform:translateX(-20px)}
     <button class="btn-dir" onclick="setDir('rtl')">RTL</button>
     <button class="btn-dir" onclick="setDir('ltr')">LTR</button>
     <div class="separator"></div>
-    <button class="btn-fullview" id="btnMdFullview" onclick="toggleMarkdownFullview()" title="نمایش تمام‌صفحه ورودی Markdown">🖥 فول‌ویو ورودی</button>
-    <button class="btn-fullview" id="btnPreviewFullview" onclick="togglePreviewFullview()" title="نمایش تمام‌صفحه پیش‌نمایش">👁 فول‌ویو پیش‌نمایش</button>
-    <button class="btn-sync" id="btnSyncScroll" onclick="toggleScrollSync()" title="هم‌زمانی اسکرول ورودی و پیش‌نمایش">🔗 هم‌گام اسکرول</button>
+    <button class="btn-fullview" id="btnMdFullview" onclick="toggleMarkdownFullview()">🖥 فول‌ویو ورودی</button>
+    <button class="btn-fullview" id="btnPreviewFullview" onclick="togglePreviewFullview()">👁 فول‌ویو پیش‌نمایش</button>
+    <button class="btn-sync" id="btnSyncScroll" onclick="toggleScrollSync()">🔗 هم‌گام اسکرول</button>
     <div class="separator"></div>
-    <button class="btn-undo-redo" id="btnUndo" onclick="undo()" title="برگشت به عقب (Ctrl+Z)">↩️ عقب</button>
-    <button class="btn-undo-redo" id="btnRedo" onclick="redo()" title="رفتن به جلو (Ctrl+Y)">↪️ جلو</button>
-    <button class="btn-align" onclick="syncMarkdownAndPreview()" style="background:#f39c12;padding:6px 10px;" title="همگام‌سازی">🔄 همگام‌سازی</button>
+    <button class="btn-undo-redo" id="btnUndo" onclick="undo()">↩️ عقب</button>
+    <button class="btn-undo-redo" id="btnRedo" onclick="redo()">↪️ جلو</button>
+    <button class="btn-align" onclick="syncMarkdownAndPreview()" style="background:#f39c12;padding:6px 10px;">🔄 همگام‌سازی</button>
     <div class="separator"></div>
     <button class="btn-clear" onclick="clearAll()">🗑 پاک</button>
   </div>
@@ -480,35 +493,33 @@ input:checked+.slider:before{transform:translateX(-20px)}
 
 <div class="container" id="mainContainer">
 
-  <!-- ========== پنل ورودی Markdown ========== -->
   <div class="panel" id="leftPanel">
     <div class="panel-header">✏️ ورودی Markdown</div>
 
-    <!-- نوار ابزار شناور فول‌ویو ورودی (فقط در حالت md-fullview نمایش داده می‌شود) -->
     <div class="fv-bar md-fv-bar">
-      <button onclick="undo()" title="برگشت به عقب (Ctrl+Z)">↩️ عقب</button>
-      <button onclick="redo()" title="رفتن به جلو (Ctrl+Y)">↪️ جلو</button>
+      <button onclick="undo()">↩️ عقب</button>
+      <button onclick="redo()">↪️ جلو</button>
       <div class="tb-sep"></div>
-      <button onclick="exportProject()" title="ذخیره پروژه با انتخاب پوشه دلخواه">💾 ذخیره پروژه</button>
-      <button onclick="triggerProjectUpload()" title="بارگذاری پروژه">📂 بارگذاری</button>
+      <button onclick="exportProject()">💾 ذخیره پروژه</button>
+      <button onclick="triggerProjectUpload()">📂 بارگذاری</button>
       <div class="tb-sep"></div>
-      <button onclick="openModal('pdfModal')" title="خروجی PDF">⬇ PDF</button>
-      <button onclick="exportWord()" title="خروجی Word">⬇ Word</button>
+      <button onclick="openModal('pdfModal')">⬇ PDF</button>
+      <button onclick="exportWord()">⬇ Word</button>
       <div class="tb-sep"></div>
-      <button onclick="setGlobalAlign('right')" title="تراز راست">≡ راست</button>
-      <button onclick="setGlobalAlign('center')" title="تراز وسط">≡ وسط</button>
-      <button onclick="setGlobalAlign('left')" title="تراز چپ">≡ چپ</button>
+      <button onclick="setGlobalAlign('right')">≡ راست</button>
+      <button onclick="setGlobalAlign('center')">≡ وسط</button>
+      <button onclick="setGlobalAlign('left')">≡ چپ</button>
       <div class="tb-sep"></div>
-      <button onclick="setDir('rtl')" title="راست به چپ">RTL</button>
-      <button onclick="setDir('ltr')" title="چپ به راست">LTR</button>
+      <button onclick="setDir('rtl')">RTL</button>
+      <button onclick="setDir('ltr')">LTR</button>
       <div class="tb-sep"></div>
-      <button onclick="openImgModal()" title="درج تصویر">🖼 عکس</button>
-      <button onclick="toggleSearchPanel()" title="ابزار ویرایش و جایگزینی">🔍 ویرایش</button>
-      <button onclick="syncMarkdownAndPreview()" title="همگام‌سازی">🔄 همگام</button>
-      <button onclick="clearAll()" title="پاک کردن همه">🗑 پاک</button>
+      <button onclick="openImgModal()">🖼 عکس</button>
+      <button onclick="toggleSearchPanel()">🔍 ویرایش</button>
+      <button onclick="syncMarkdownAndPreview()">🔄 همگام</button>
+      <button onclick="clearAll()">🗑 پاک</button>
       <div class="tb-sep"></div>
-      <button onclick="togglePreviewFullview()" title="رفتن به فول‌ویو پیش‌نمایش">👁 پیش‌نمایش</button>
-      <button class="accent" onclick="toggleMarkdownFullview()" title="خروج از فول‌ویو">✕ خروج از فول‌ویو</button>
+      <button onclick="togglePreviewFullview()">👁 پیش‌نمایش</button>
+      <button class="accent" onclick="toggleMarkdownFullview()">✕ خروج از فول‌ویو</button>
       <span class="fv-badge">🖥 حالت فول‌ویو ورودی — Esc برای خروج</span>
     </div>
 
@@ -517,39 +528,39 @@ input:checked+.slider:before{transform:translateX(-20px)}
 
   <div class="resizer" id="resizer"></div>
 
-  <!-- ========== پنل پیش‌نمایش ========== -->
   <div class="panel" id="rightPanel">
     <div class="panel-header">
       👁 پیش‌نمایش
-      <button onclick="toggleSearchPanel()" style="background:#2c3e50; color:white; font-size:.78rem; padding:4px 10px; border-radius:5px; margin-right: auto;">🔍 ابزار ویرایش و جایگزینی پیشرفته</button>
+      <button onclick="selectAllPreview()" style="background:#16a085; color:white; font-size:.78rem; padding:4px 10px; border-radius:5px; margin-right: auto;" title="انتخاب کل متن پیش‌نمایش">☑ انتخاب همه</button>
+      <button onclick="toggleSearchPanel()" style="background:#2c3e50; color:white; font-size:.78rem; padding:4px 10px; border-radius:5px;">🔍 ابزار ویرایش</button>
       <span style="font-size:.75rem;color:#999;font-weight:normal;margin-right:10px">💡 برای تراز انفرادی، متن را انتخاب کنید</span>
     </div>
 
-    <!-- نوار ابزار شناور فول‌ویو پیش‌نمایش -->
     <div class="fv-bar preview-fv-bar">
-      <button onclick="undo()" title="برگشت به عقب (Ctrl+Z)">↩️ عقب</button>
-      <button onclick="redo()" title="رفتن به جلو (Ctrl+Y)">↪️ جلو</button>
+      <button onclick="undo()">↩️ عقب</button>
+      <button onclick="redo()">↪️ جلو</button>
       <div class="tb-sep"></div>
-      <button onclick="exportProject()" title="ذخیره پروژه با انتخاب پوشه دلخواه">💾 ذخیره پروژه</button>
-      <button onclick="triggerProjectUpload()" title="بارگذاری پروژه">📂 بارگذاری</button>
+      <button onclick="exportProject()">💾 ذخیره پروژه</button>
+      <button onclick="triggerProjectUpload()">📂 بارگذاری</button>
       <div class="tb-sep"></div>
-      <button onclick="openModal('pdfModal')" title="خروجی PDF">⬇ PDF</button>
-      <button onclick="exportWord()" title="خروجی Word">⬇ Word</button>
+      <button onclick="openModal('pdfModal')">⬇ PDF</button>
+      <button onclick="exportWord()">⬇ Word</button>
       <div class="tb-sep"></div>
-      <button onclick="setGlobalAlign('right')" title="تراز راست">≡ راست</button>
-      <button onclick="setGlobalAlign('center')" title="تراز وسط">≡ وسط</button>
-      <button onclick="setGlobalAlign('left')" title="تراز چپ">≡ چپ</button>
+      <button onclick="selectAllPreview()">☑ انتخاب همه</button>
+      <button onclick="setGlobalAlign('right')">≡ راست</button>
+      <button onclick="setGlobalAlign('center')">≡ وسط</button>
+      <button onclick="setGlobalAlign('left')">≡ چپ</button>
       <div class="tb-sep"></div>
-      <button onclick="setDir('rtl')" title="راست به چپ">RTL</button>
-      <button onclick="setDir('ltr')" title="چپ به راست">LTR</button>
+      <button onclick="setDir('rtl')">RTL</button>
+      <button onclick="setDir('ltr')">LTR</button>
       <div class="tb-sep"></div>
-      <button onclick="openImgModal()" title="درج تصویر">🖼 عکس</button>
-      <button onclick="toggleSearchPanel()" title="ابزار ویرایش و جایگزینی">🔍 ویرایش</button>
-      <button onclick="syncMarkdownAndPreview()" title="همگام‌سازی">🔄 همگام</button>
-      <button onclick="clearAll()" title="پاک کردن همه">🗑 پاک</button>
+      <button onclick="openImgModal()">🖼 عکس</button>
+      <button onclick="toggleSearchPanel()">🔍 ویرایش</button>
+      <button onclick="syncMarkdownAndPreview()">🔄 همگام</button>
+      <button onclick="clearAll()">🗑 پاک</button>
       <div class="tb-sep"></div>
-      <button onclick="toggleMarkdownFullview()" title="رفتن به فول‌ویو ورودی">🖥 ورودی</button>
-      <button class="accent" onclick="togglePreviewFullview()" title="خروج از فول‌ویو">✕ خروج از فول‌ویو</button>
+      <button onclick="toggleMarkdownFullview()">🖥 ورودی</button>
+      <button class="accent" onclick="togglePreviewFullview()">✕ خروج از فول‌ویو</button>
       <span class="fv-badge">👁 حالت فول‌ویو پیش‌نمایش — Esc برای خروج</span>
     </div>
 
@@ -587,9 +598,9 @@ input:checked+.slider:before{transform:translateX(-20px)}
       </div>
       
       <div class="search-format-row">
-        <label class="search-checkbox"><input type="checkbox" id="findBold"> <b>B</b> ضخیم (Bold)</label>
-        <label class="search-checkbox"><input type="checkbox" id="findItalic"> <i>I</i> کج (Italic)</label>
-        <label class="search-checkbox"><input type="checkbox" id="findUnderline"> <u>U</u> خط‌دار (Underline)</label>
+        <label class="search-checkbox"><input type="checkbox" id="findBold"> <b>B</b> ضخیم</label>
+        <label class="search-checkbox"><input type="checkbox" id="findItalic"> <i>I</i> کج</label>
+        <label class="search-checkbox"><input type="checkbox" id="findUnderline"> <u>U</u> خط‌دار</label>
         <div class="separator" style="background:#ddd; height:20px;"></div>
         <div class="search-field" style="flex-direction:row; align-items:center; gap:6px;">
           <label style="margin:0;">تراز بلاک:</label>
@@ -604,11 +615,11 @@ input:checked+.slider:before{transform:translateX(-20px)}
           <label style="margin:0;">جهت متن:</label>
           <select id="findDir" style="padding:3px 6px;">
             <option value="">بدون تغییر</option>
-            <option value="rtl">RTL (راست به چپ)</option>
-            <option value="ltr">LTR (چپ به راست)</option>
+            <option value="rtl">RTL</option>
+            <option value="ltr">LTR</option>
           </select>
         </div>
-        <button onclick="applyStyleToSearchMatches()" style="background:#27ae60; color:white; padding:6px 14px; margin-right:auto; font-weight:bold;">✅ اعمال تغییرات و جایگزینی</button>
+        <button onclick="applyStyleToSearchMatches()" style="background:#27ae60; color:white; padding:6px 14px; margin-right:auto; font-weight:bold;">✅ اعمال تغییرات</button>
       </div>
     </div>
 
@@ -621,8 +632,82 @@ input:checked+.slider:before{transform:translateX(-20px)}
    پیکربندی اولیه
 ========================================================= */
 mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
-marked.setOptions({breaks:true,gfm:true});
+
+/* =========================================================
+   Extension رسمی KaTeX برای marked
+========================================================= */
+const mathExt = {
+  name: 'math',
+  level: 'inline',
+  start(src){ const i = src.search(/\$|\\\(|\\\[/); return i < 0 ? undefined : i; },
+  tokenizer(src){
+    let m;
+    if((m = src.match(/^\$\$([\s\S]+?)\$\$/))) return {type:'math', raw:m[0], text:m[1], display:true};
+    if((m = src.match(/^\\\[([\s\S]+?)\\\]/))) return {type:'math', raw:m[0], text:m[1], display:true};
+    if((m = src.match(/^\$([^\$\n]+?)\$/))) return {type:'math', raw:m[0], text:m[1], display:false};
+    if((m = src.match(/^\\\(([\s\S]+?)\\\)/))) return {type:'math', raw:m[0], text:m[1], display:false};
+  },
+  renderer(token){
+    try {
+      return katex.renderToString(token.text, { displayMode: token.display, throwOnError: false, strict: false, errorColor: '#cc0000' });
+    } catch(e){ return token.raw; }
+  }
+};
+marked.use({ breaks: true, gfm: true, extensions: [mathExt] });
+
 const input=document.getElementById('mdInput'),preview=document.getElementById('preview');
+
+/* =========================================================
+   🔥 محافظت از Mermaid: snapshot/restore
+========================================================= */
+function snapshotMermaids(){
+  const snaps = [];
+  preview.querySelectorAll('.mermaid-wrapper').forEach(w => {
+    const m = w.querySelector('.mermaid');
+    if(!m) return;
+    const svg = m.querySelector('svg');
+    snaps.push({
+      mermaid: m,
+      hasSVG: !!svg,
+      svgChildrenCount: svg ? svg.children.length : 0,
+      svgStyle: svg ? (svg.getAttribute('style') || '') : '',
+      svgHTML: svg ? svg.outerHTML : ''
+    });
+  });
+  return snaps;
+}
+function restoreMermaidsIfBroken(snaps){
+  if(!snaps || !snaps.length) return;
+  const toRender = [];
+  snaps.forEach(s => {
+    const m = s.mermaid;
+    if(!m || !m.isConnected) return;
+    const svg = m.querySelector('svg');
+    const broken = s.hasSVG && (!svg || svg.children.length === 0);
+    if(broken){
+      const code = m.getAttribute('data-original-code');
+      if(code){
+        m.innerHTML = '';
+        m.textContent = code;
+        m.removeAttribute('data-processed');
+        toRender.push(m);
+      }
+    } else if(svg && s.svgStyle && svg.getAttribute('style') !== s.svgStyle){
+      svg.setAttribute('style', s.svgStyle);
+    }
+  });
+  if(toRender.length){
+    mermaid.run({ nodes: toRender }).catch(e => console.error('خطا در بازیابی Mermaid:', e));
+  }
+}
+/**
+ * اجرای ایمن یک عملیات استایل که به Mermaidها آسیب نزند
+ */
+function safeStyleOp(fn){
+  const snaps = snapshotMermaids();
+  try { fn(); } catch(e){ console.error(e); }
+  restoreMermaidsIfBroken(snaps);
+}
 
 /* =========================================================
    توست
@@ -665,7 +750,7 @@ document.addEventListener('keydown', e => {
 });
 
 /* =========================================================
-   Mermaid
+   Mermaid processing
 ========================================================= */
 async function processMermaidDiagrams() {
   const blocks = preview.querySelectorAll('pre code.language-mermaid');
@@ -675,16 +760,21 @@ async function processMermaidDiagrams() {
     const parent = block.parentElement;
     const wrapper = document.createElement('div');
     wrapper.className = 'mermaid-wrapper';
+    // 🔥 محافظت: جلوگیری از دسترسی ویرایشگر به داخل SVG
+    wrapper.setAttribute('contenteditable', 'false');
     const toolbar = document.createElement('div');
     toolbar.className = 'mermaid-toolbar';
     toolbar.innerHTML = `
-      <label>عرض: <input type="range" min="150" max="1400" value="800" oninput="resizeMermaid(this)"></label>
+      <label>عرض: <input type="range" class="mm-slider" min="150" max="1400" value="800" oninput="resizeMermaid(this)"></label>
+      <label><input type="number" class="mm-pct" min="10" max="200" value="100" oninput="resizeMermaidPct(this)">%</label>
       <div class="tb-sep"></div>
       <button onclick="fitMermaid(this, 'container')">↔ کل عرض</button>
       <button onclick="fitMermaid(this, 'auto')">↺ ریست</button>
       <div class="tb-sep"></div>
-      <button onclick="zoomMermaid(this, 1.1)">➕ بزرگ‌تر</button>
-      <button onclick="zoomMermaid(this, 0.9)">➖ کوچک‌تر</button>
+      <button onclick="zoomMermaid(this, 1.1)">➕</button>
+      <button onclick="zoomMermaid(this, 0.9)">➖</button>
+      <div class="tb-sep"></div>
+      <button class="edit" onclick="editMermaid(this)">✏️ ویرایش</button>
     `;
     const div = document.createElement('div');
     div.className = 'mermaid';
@@ -700,24 +790,129 @@ async function processMermaidDiagrams() {
     }
   } catch (err) { console.error("خطا در پردازش نمودار:", err); }
 }
+
+/* =========================================================
+   🆕 ویرایش Mermaid
+========================================================= */
+let editingMermaidWrapper = null;
+
+function editMermaid(btn){
+  const wrapper = btn.closest('.mermaid-wrapper');
+  const m = wrapper.querySelector('.mermaid');
+  if(!m) return;
+  const code = m.getAttribute('data-original-code') || m.textContent;
+  editingMermaidWrapper = wrapper;
+  const ta = document.getElementById('mermaidEditCode');
+  ta.value = code;
+  openModal('mermaidEditModal');
+  setTimeout(() => { ta.focus(); ta.setSelectionRange(0, 0); }, 100);
+}
+
+async function saveMermaidEdit(){
+  if(!editingMermaidWrapper){ closeModal('mermaidEditModal'); return; }
+  const wrapper = editingMermaidWrapper;
+  const newCode = document.getElementById('mermaidEditCode').value;
+  const m = wrapper.querySelector('.mermaid');
+  if(!m){ closeModal('mermaidEditModal'); return; }
+
+  // ذخیره عرض فعلی
+  const oldSvg = m.querySelector('svg');
+  const savedMaxWidth = oldSvg ? oldSvg.style.maxWidth : '';
+  const savedWidth = oldSvg ? oldSvg.style.width : '';
+
+  m.setAttribute('data-original-code', newCode);
+  m.innerHTML = '';
+  m.textContent = newCode;
+  m.removeAttribute('data-processed');
+
+  try {
+    await mermaid.run({ nodes: [m] });
+    const newSvg = m.querySelector('svg');
+    if(newSvg){
+      if(savedMaxWidth) newSvg.style.maxWidth = savedMaxWidth;
+      if(savedWidth) newSvg.style.width = savedWidth;
+    }
+    showToast('✅ نمودار ویرایش شد');
+  } catch(err){
+    console.error(err);
+    showToast('❌ خطا در رندر نمودار — کد را بررسی کنید');
+  }
+
+  editingMermaidWrapper = null;
+  closeModal('mermaidEditModal');
+  saveState();
+}
+
+function getMermaidContainerWidth(wrapper){
+  const m = wrapper.querySelector('.mermaid');
+  return (m && m.clientWidth) ? m.clientWidth : 800;
+}
 function resizeMermaid(r){
-  const svg = r.closest('.mermaid-wrapper').querySelector('svg');
-  if (svg) { svg.style.maxWidth = r.value + 'px'; svg.style.width = '100%'; svg.style.height = 'auto'; }
+  const wrapper = r.closest('.mermaid-wrapper');
+  const svg = wrapper.querySelector('svg');
+  const pctInput = wrapper.querySelector('.mm-pct');
+  if (svg) {
+    svg.style.maxWidth = r.value + 'px';
+    svg.style.width = '100%';
+    svg.style.height = 'auto';
+  }
+  if (pctInput) {
+    const cw = getMermaidContainerWidth(wrapper);
+    pctInput.value = Math.max(10, Math.min(200, Math.round((r.value / cw) * 100)));
+  }
+  saveState();
+}
+function resizeMermaidPct(inp){
+  const wrapper = inp.closest('.mermaid-wrapper');
+  const svg = wrapper.querySelector('svg');
+  const rng = wrapper.querySelector('.mm-slider');
+  let pct = parseInt(inp.value) || 100;
+  pct = Math.max(10, Math.min(200, pct));
+  inp.value = pct;
+  if (svg) {
+    if (pct <= 100) {
+      svg.style.maxWidth = pct + '%';
+      svg.style.width = '100%';
+    } else {
+      svg.style.maxWidth = 'none';
+      svg.style.width = pct + '%';
+    }
+    svg.style.height = 'auto';
+  }
+  if (rng) {
+    const cw = getMermaidContainerWidth(wrapper);
+    rng.value = Math.max(150, Math.min(1400, Math.round((pct / 100) * cw)));
+  }
   saveState();
 }
 function fitMermaid(btn, mode){
   const wrapper = btn.closest('.mermaid-wrapper');
   const svg = wrapper.querySelector('svg');
-  const rng = wrapper.querySelector('input[type=range]');
+  const rng = wrapper.querySelector('.mm-slider');
+  const pctInput = wrapper.querySelector('.mm-pct');
   if(!svg) return;
-  if(mode==='container'){ svg.style.maxWidth='100%'; svg.style.width='100%'; if(rng) rng.value=1400; }
-  else { svg.style.maxWidth='800px'; svg.style.width='100%'; if(rng) rng.value=800; }
+  if(mode==='container'){
+    svg.style.maxWidth='100%';
+    svg.style.width='100%';
+    if(rng) rng.value=1400;
+    if(pctInput) pctInput.value=100;
+  }
+  else {
+    svg.style.maxWidth='800px';
+    svg.style.width='100%';
+    if(rng) rng.value=800;
+    if(pctInput){
+      const cw = getMermaidContainerWidth(wrapper);
+      pctInput.value = Math.max(10, Math.min(200, Math.round((800 / cw) * 100)));
+    }
+  }
   saveState();
 }
 function zoomMermaid(btn, factor){
   const wrapper = btn.closest('.mermaid-wrapper');
   const svg = wrapper.querySelector('svg');
-  const rng = wrapper.querySelector('input[type=range]');
+  const rng = wrapper.querySelector('.mm-slider');
+  const pctInput = wrapper.querySelector('.mm-pct');
   if(!svg || !rng) return;
   let newVal = Math.round(parseInt(rng.value) * factor);
   newVal = Math.max(150, Math.min(1400, newVal));
@@ -725,6 +920,10 @@ function zoomMermaid(btn, factor){
   svg.style.maxWidth = newVal + 'px';
   svg.style.width = '100%';
   svg.style.height = 'auto';
+  if(pctInput){
+    const cw = getMermaidContainerWidth(wrapper);
+    pctInput.value = Math.max(10, Math.min(200, Math.round((newVal / cw) * 100)));
+  }
   saveState();
 }
 
@@ -733,8 +932,7 @@ function zoomMermaid(btn, factor){
 ========================================================= */
 let renderTimeout;
 function renderPreview(){
-  preview.innerHTML=marked.parse(input.value);
-  renderMathInElement(preview,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false});
+  preview.innerHTML = marked.parse(input.value);
   processMermaidDiagrams();
 }
 input.addEventListener('input', () => {
@@ -763,7 +961,7 @@ function applyStyleToSearchMatches() {
     align: document.getElementById('findAlign').value,
     dir: document.getElementById('findDir').value
   };
-  highlightAndReplaceSearchTerm(preview, term, replaceTerm, styles);
+  safeStyleOp(() => highlightAndReplaceSearchTerm(preview, term, replaceTerm, styles));
   syncMarkdownAndPreview();
 }
 function highlightAndReplaceSearchTerm(root, term, replaceTerm, styles) {
@@ -855,8 +1053,9 @@ function loadProjectFile(file) {
         if (data.globalDir) preview.style.direction = data.globalDir;
         renderMathInElement(preview,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false});
         preview.querySelectorAll('.mermaid-wrapper').forEach(w => {
+          w.setAttribute('contenteditable', 'false');
           const m = w.querySelector('.mermaid');
-          if(m && m.getAttribute('data-original-code')) { m.innerHTML=''; m.textContent = m.getAttribute('data-original-code'); }
+          if(m && m.getAttribute('data-original-code')) { m.innerHTML=''; m.textContent = m.getAttribute('data-original-code'); m.removeAttribute('data-processed'); }
         });
         processMermaidDiagrams();
         saveState();
@@ -895,33 +1094,27 @@ function setGlobalAlign(a){
 function setDir(d){ preview.style.direction=d; input.style.direction=d; saveState(); }
 
 /* =========================================================
-   🔥 فول‌ویو — ورودی و پیش‌نمایش (هدر مخفی می‌شود)
+   فول‌ویو
 ========================================================= */
 function updateBodyFullviewClass(){
   const c = document.getElementById('mainContainer');
   const active = c.classList.contains('md-fullview') || c.classList.contains('preview-fullview');
   document.body.classList.toggle('fullview-active', active);
 }
-
 function toggleMarkdownFullview(){
   const c = document.getElementById('mainContainer');
-  // اگر پیش‌نمایش فول‌ویو بود، غیرفعالش کن
   c.classList.remove('preview-fullview');
   document.getElementById('btnPreviewFullview').classList.remove('active');
-
   c.classList.toggle('md-fullview');
   const isActive = c.classList.contains('md-fullview');
   document.getElementById('btnMdFullview').classList.toggle('active', isActive);
   updateBodyFullviewClass();
   showToast(isActive ? '🖥 فول‌ویو ورودی فعال — Esc برای خروج' : '↩ حالت عادی');
 }
-
 function togglePreviewFullview(){
   const c = document.getElementById('mainContainer');
-  // اگر ورودی فول‌ویو بود، غیرفعالش کن
   c.classList.remove('md-fullview');
   document.getElementById('btnMdFullview').classList.remove('active');
-
   c.classList.toggle('preview-fullview');
   const isActive = c.classList.contains('preview-fullview');
   document.getElementById('btnPreviewFullview').classList.toggle('active', isActive);
@@ -971,26 +1164,92 @@ function showSelTb(){
   if(!preview.contains(range.commonAncestorContainer)){selTb.style.display='none';return}
   const rect=range.getBoundingClientRect();
   selTb.style.display='flex';
-  selTb.style.top=(rect.top+window.scrollY-54)+'px';
-  selTb.style.left=(rect.left+window.scrollX+rect.width/2-150)+'px';
+  selTb.style.top=Math.max(10, rect.top - 54)+'px';
+  selTb.style.left=Math.max(10, Math.min(window.innerWidth-340, rect.left + rect.width/2 - 200))+'px';
 }
 document.addEventListener('mousedown',e=>{if(!selTb.contains(e.target))selTb.style.display='none'});
 
-function applyStyle(command) { document.execCommand(command, false, null); saveState(); }
-function applyCustomFont(fontName) { if(!fontName) return; document.execCommand('fontName', false, fontName); saveState(); }
+/* =========================================================
+   انتخاب همه در پیش‌نمایش
+========================================================= */
+function selectAllPreview(){
+  preview.focus();
+  const range = document.createRange();
+  range.selectNodeContents(preview);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  const pRect = preview.getBoundingClientRect();
+  selTb.style.display = 'flex';
+  selTb.style.top = Math.max(10, pRect.top + 20) + 'px';
+  selTb.style.left = Math.max(10, Math.min(window.innerWidth-340, pRect.left + pRect.width/2 - 200)) + 'px';
+}
+
+/* =========================================================
+   رنگ‌آمیزی متن انتخاب‌شده
+========================================================= */
+let savedColorSelection = null;
+function saveColorSelection(){
+  const sel = window.getSelection();
+  if(sel && sel.rangeCount > 0 && !sel.isCollapsed && preview.contains(sel.getRangeAt(0).commonAncestorContainer)){
+    savedColorSelection = sel.getRangeAt(0).cloneRange();
+  }
+}
+function applySelectionColor(color){
+  safeStyleOp(() => {
+    const sel = window.getSelection();
+    if(savedColorSelection){
+      preview.focus();
+      sel.removeAllRanges();
+      sel.addRange(savedColorSelection);
+      savedColorSelection = null;
+    }
+    if(sel && sel.rangeCount > 0 && !sel.isCollapsed && preview.contains(sel.getRangeAt(0).commonAncestorContainer)){
+      try {
+        document.execCommand('foreColor', false, color);
+      } catch(e){
+        const range = sel.getRangeAt(0);
+        const span = document.createElement('span');
+        span.style.color = color;
+        try { range.surroundContents(span); } catch(err){
+          const frag = range.extractContents();
+          span.appendChild(frag);
+          range.insertNode(span);
+        }
+        sel.removeAllRanges();
+        const nr = document.createRange();
+        nr.selectNodeContents(span);
+        sel.addRange(nr);
+      }
+    }
+  });
+  saveState();
+}
+
+function applyStyle(command) {
+  safeStyleOp(() => document.execCommand(command, false, null));
+  saveState();
+}
+function applyCustomFont(fontName) {
+  if(!fontName) return;
+  safeStyleOp(() => document.execCommand('fontName', false, fontName));
+  saveState();
+}
 function applyCustomSize(size) {
   if(!size) return;
-  const sel = window.getSelection();
-  if(!sel.rangeCount || sel.isCollapsed) return;
-  const range = sel.getRangeAt(0);
-  const span = document.createElement('span');
-  span.style.fontSize = size;
-  try { range.surroundContents(span); }
-  catch(e) {
-    document.execCommand('fontSize', false, '3');
-    const fonts = preview.querySelectorAll('font[size="3"]');
-    fonts.forEach(f => { f.removeAttribute('size'); f.style.fontSize = size; });
-  }
+  safeStyleOp(() => {
+    const sel = window.getSelection();
+    if(!sel.rangeCount || sel.isCollapsed) return;
+    const range = sel.getRangeAt(0);
+    const span = document.createElement('span');
+    span.style.fontSize = size;
+    try { range.surroundContents(span); }
+    catch(e) {
+      document.execCommand('fontSize', false, '3');
+      const fonts = preview.querySelectorAll('font[size="3"]');
+      fonts.forEach(f => { f.removeAttribute('size'); f.style.fontSize = size; });
+    }
+  });
   saveState();
 }
 function triggerFontUpload() { document.getElementById('fontFileInput').click(); }
@@ -1014,8 +1273,26 @@ function loadUploadedFont(e) {
   };
   reader.readAsDataURL(file);
 }
-function applySelectionAlign(a){const sel=window.getSelection();if(!sel||sel.isCollapsed)return;getSelBlocks(sel.getRangeAt(0)).forEach(b=>b.style.textAlign=a);selTb.style.display='none';sel.removeAllRanges();saveState()}
-function applySelectionDir(d){const sel=window.getSelection();if(!sel||sel.isCollapsed)return;getSelBlocks(sel.getRangeAt(0)).forEach(b=>{b.style.direction=d;b.style.textAlign=d==='rtl'?'right':'left'});selTb.style.display='none';sel.removeAllRanges();saveState()}
+function applySelectionAlign(a){
+  safeStyleOp(() => {
+    const sel=window.getSelection();
+    if(!sel||sel.isCollapsed)return;
+    getSelBlocks(sel.getRangeAt(0)).forEach(b=>b.style.textAlign=a);
+    sel.removeAllRanges();
+  });
+  selTb.style.display='none';
+  saveState();
+}
+function applySelectionDir(d){
+  safeStyleOp(() => {
+    const sel=window.getSelection();
+    if(!sel||sel.isCollapsed)return;
+    getSelBlocks(sel.getRangeAt(0)).forEach(b=>{b.style.direction=d;b.style.textAlign=d==='rtl'?'right':'left'});
+    sel.removeAllRanges();
+  });
+  selTb.style.display='none';
+  saveState();
+}
 function getSelBlocks(range){
   const bt=new Set(['P','H1','H2','H3','H4','H5','H6','LI','BLOCKQUOTE','TD','TH','DIV','SECTION']),blocks=[],seen=new Set();
   let node=range.startContainer;
@@ -1105,10 +1382,19 @@ function confirmInsertImage(){
 function buildImgWrapper(url,width,align){
   const wrapper=document.createElement('div');
   wrapper.className='img-wrapper';
+  // 🔥 محافظت از تصویر
+  wrapper.setAttribute('contenteditable', 'false');
   const w=parseInt(width)||300;
   const toolbar=document.createElement('div');
   toolbar.className='img-toolbar';
-  toolbar.innerHTML=`<label>اندازه: <input type="range" min="50" max="800" value="${w}" oninput="resizeImg(this)"></label><div class="tb-sep"></div><button onclick="alignImg(this,'right')">راست</button><button onclick="alignImg(this,'center')">وسط</button><button onclick="alignImg(this,'left')">چپ</button><div class="tb-sep"></div><button class="del" onclick="removeImg(this)">🗑 حذف</button>`;
+  toolbar.innerHTML=`<label>عرض: <input type="range" class="img-slider" min="50" max="800" value="${w}" oninput="resizeImg(this)"></label>
+    <label><input type="number" class="img-pct" min="5" max="100" value="100" oninput="resizeImgPct(this)">%</label>
+    <div class="tb-sep"></div>
+    <button onclick="alignImg(this,'right')">راست</button>
+    <button onclick="alignImg(this,'center')">وسط</button>
+    <button onclick="alignImg(this,'left')">چپ</button>
+    <div class="tb-sep"></div>
+    <button class="del" onclick="removeImg(this)">🗑 حذف</button>`;
   const inner=document.createElement('div');
   inner.className='img-inner align-'+align;
   const img=document.createElement('img');
@@ -1123,7 +1409,31 @@ function buildImgWrapper(url,width,align){
   } else { preview.appendChild(wrapper); }
   saveState();
 }
-function resizeImg(r){r.closest('.img-wrapper').querySelector('img').style.width=r.value+'px';saveState()}
+function resizeImg(r){
+  const wrapper = r.closest('.img-wrapper');
+  const img = wrapper.querySelector('img');
+  const pctInput = wrapper.querySelector('.img-pct');
+  if (img) img.style.width = r.value + 'px';
+  if (pctInput) {
+    const cw = wrapper.querySelector('.img-inner').clientWidth || 800;
+    pctInput.value = Math.max(5, Math.min(100, Math.round((r.value / cw) * 100)));
+  }
+  saveState();
+}
+function resizeImgPct(inp){
+  const wrapper = inp.closest('.img-wrapper');
+  const img = wrapper.querySelector('img');
+  const slider = wrapper.querySelector('.img-slider');
+  let pct = parseInt(inp.value) || 100;
+  pct = Math.max(5, Math.min(100, pct));
+  inp.value = pct;
+  if (img) img.style.width = pct + '%';
+  if (slider) {
+    const cw = wrapper.querySelector('.img-inner').clientWidth || 800;
+    slider.value = Math.max(50, Math.min(800, Math.round((pct / 100) * cw)));
+  }
+  saveState();
+}
 function alignImg(btn,a){btn.closest('.img-wrapper').querySelector('.img-inner').className='img-inner align-'+a;saveState()}
 function removeImg(btn){btn.closest('.img-wrapper').remove();saveState()}
 
@@ -1148,7 +1458,7 @@ preview.addEventListener('paste', e=>{
 });
 
 /* =========================================================
-   پیست هوشمند لینک مستقیم تصویر در Markdown
+   پیست هوشمند لینک مستقیم تصویر
 ========================================================= */
 function isDirectImageUrl(url){
   return /^https?:\/\/[^\s]+\.(png|jpe?g|gif|webp|svg|bmp|ico|avif)(\?[^\s]*)?(#\S*)?$/i.test(url);
@@ -1364,7 +1674,7 @@ function clearAll(){ input.value=''; preview.innerHTML=''; saveState(); }
    مقدار پیش‌فرض
 ========================================================= */
 window.addEventListener('DOMContentLoaded', () => {
-  input.value=`# جزوه نمونه با ابزارهای پیشرفته\n\n## نمودار گرافیکی Mermaid\n\n\`\`\`mermaid\ngraph TD\n    A[شروع مطالعه] --> B(یادداشت برداری)\n    B --> C{آیا کلمات کلیدی مهم هستند؟}\n    C -- بله --> D[هایلایت و تغییر استایل کلمه]\n    C -- خیر --> E[ادامه خواندن]\n    D --> F[موفقیت در امتحان]\n    E --> F\n\`\`\`\n\n## معادلات ریاضی\nفرمول انرژی اینشتین: $E = mc^2$\n\nمعادله دیفرانسیل:\n$$\\\\frac{d^2y}{dx^2} + \\\\omega^2 y = 0$$\n\n## جدول نمونه\n\n| لایه | مقاومت کششی | عروق |\n|------|-------------|------|\n| اپیدرم | ندارد | آواسکولار |\n| درم | بالا | پرعروق |\n\n## لیست\n- نکته اول این بخش بسیار مهم است\n- نکته دوم\n- نکته سوم\n\n> این یک blockquote است.\n`;
+  input.value=`# جزوه نمونه با ابزارهای پیشرفته\n\n## نمودار گرافیکی Mermaid\n\n\`\`\`mermaid\ngraph TD\n    A[شروع مطالعه] --> B(یادداشت برداری)\n    B --> C{آیا کلمات کلیدی مهم هستند؟}\n    C -- بله --> D[هایلایت و تغییر استایل کلمه]\n    C -- خیر --> E[ادامه خواندن]\n    D --> F[موفقیت در امتحان]\n    E --> F\n\`\`\`\n\n## معادلات ریاضی\n\nفرمول انرژی اینشتین: $E = mc^2$\n\nمعادله دیفرانسیل:\n\n$$\\\\frac{d^2y}{dx^2} + \\\\omega^2 y = 0$$\n\n## جدول نمونه\n\n| لایه | مقاومت کششی | عروق |\n|------|-------------|------|\n| اپیدرم | ندارد | آواسکولار |\n| درم | بالا | پرعروق |\n\n## لیست\n- نکته اول این بخش بسیار مهم است\n- نکته دوم\n- نکته سوم\n\n> این یک blockquote است.\n`;
   renderPreview();
   saveState();
 
