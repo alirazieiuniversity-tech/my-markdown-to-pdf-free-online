@@ -116,7 +116,6 @@ body.fullview-active .container{height:100vh;padding:8px}
 #preview strong{color:var(--pv-bold-color)}
 #preview em{color:var(--pv-italic-color)}
 #preview a{color:var(--pv-link-color)}
-/* 🔥 فرمول‌ها: همیشه LTR و ایزوله از متن فارسی اطراف */
 #preview .katex,
 #preview .katex *{
   direction:ltr;
@@ -211,6 +210,23 @@ input:checked+.slider:before{transform:translateX(-20px)}
 .template-card.add-new{border-style:dashed;border-color:#c0c0c0;background:#fafafa}
 .template-card.add-new:hover{border-color:#27ae60;background:#f0fff4}
 .template-card.add-new .tc-icon,.template-card.add-new .tc-name{color:#27ae60}
+/* === NEW: per-card action buttons (edit / delete) === */
+.template-card .tc-actions{
+  position:absolute;top:3px;right:3px;display:flex;gap:2px;
+  opacity:0;transition:opacity .15s;z-index:6;
+}
+.template-card:hover .tc-actions{opacity:1}
+.template-card .tc-actions button{
+  background:rgba(30,58,95,.9);color:white;padding:2px 5px;
+  font-size:.72rem;border-radius:4px;min-width:0;line-height:1;
+  font-family:inherit;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.25);
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.template-card .tc-actions button:hover{background:#1e3a5f;opacity:1;transform:none}
+.template-card .tc-actions button.del{background:rgba(231,76,60,.9)}
+.template-card .tc-actions button.del:hover{background:#e74c3c}
+.template-card .tc-actions button.pin{background:rgba(39,174,96,.9)}
+.template-card .tc-actions button.pin:hover{background:#27ae60}
 .tmpl-sec-title{font-weight:bold;font-size:.88rem;color:#1e3a5f;border-bottom:1px solid #e0e8f4;padding-bottom:6px;margin:16px 0 10px}
 .template-editor{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;max-height:380px;overflow-y:auto;padding:6px;border:1px solid #eee;border-radius:8px}
 .tpl-group{grid-column:1/-1;font-size:.82rem;font-weight:bold;color:#6c5ce7;margin-top:8px;padding-bottom:4px;border-bottom:1px dashed #e0e0e0}
@@ -253,6 +269,16 @@ input:checked+.slider:before{transform:translateX(-20px)}
 .paste-target.paste-flash{border-color:#27ae60!important;background:#eafaf0!important}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a5f;color:white;padding:10px 20px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.3);font-size:.85rem;opacity:0;transition:all .3s;z-index:99999;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+/* Custom modal for editing template meta */
+#tplMetaModal .modal-box{width:420px}
+#tplMetaModal .meta-row{display:flex;gap:10px;margin-bottom:14px}
+#tplMetaModal .meta-row .msec{margin:0}
+#tplMetaModal .meta-row .msec:first-child{flex:1}
+#tplMetaModal .meta-row .msec:last-child{flex:0 0 100px}
+#tplMetaModal .emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin-top:6px}
+#tplMetaModal .emoji-grid button{background:#f0f2f5;font-size:1.2rem;padding:5px 0;border-radius:6px;justify-content:center;border:1.5px solid transparent}
+#tplMetaModal .emoji-grid button:hover{background:#e0e8f4;border-color:#1e3a5f;opacity:1}
+#tplMetaModal .emoji-grid button.selected{background:#fff8ed;border-color:#f39c12}
 </style>
 </head>
 <body>
@@ -260,6 +286,7 @@ input:checked+.slider:before{transform:translateX(-20px)}
 <input type="file" id="fontFileInput" accept=".ttf,.woff,.woff2,.otf" multiple style="display:none" onchange="loadUploadedFont(event)">
 <input type="file" id="projectFileInput" accept=".jzv" style="display:none" onchange="loadProjectFromInput(event)">
 <input type="file" id="tplFileInput" accept=".json,application/json" style="display:none" onchange="importTemplatesJSON(event)">
+<input type="file" id="htmlTplFileInput" accept=".html,.htm" style="display:none" onchange="importHtmlTemplateFromInput(event)">
 
 <div id="toast"></div>
 
@@ -405,6 +432,9 @@ input:checked+.slider:before{transform:translateX(-20px)}
     <h3>🎨 تمپلیت ظاهری (Theme)</h3>
     <div class="tmpl-sec-title">تمپلیت‌ها — روی هرکدام کلیک کنید تا اعمال شود</div>
     <div id="templateGrid" class="template-grid"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin:8px 0 4px;flex-wrap:wrap">
+      <button style="background:#95a5a6;color:white;padding:5px 12px;font-size:.78rem" onclick="restoreHiddenBuiltins()">🔄 بازیابی پیش‌فرض‌ها</button>
+    </div>
     <div class="tmpl-sec-title">ویرایش جزئیات — تغییرات زنده اعمال می‌شوند</div>
     <div id="templateEditor" class="template-editor"></div>
     <div class="modal-btns" style="margin-top:22px;flex-wrap:wrap;justify-content:flex-start;gap:8px">
@@ -413,6 +443,8 @@ input:checked+.slider:before{transform:translateX(-20px)}
       <button style="background:#e67e22;color:white" onclick="openFontModal()">🔤 مدیریت فونت‌ها</button>
       <button style="background:#8e44ad;color:white" onclick="exportTemplatesJSON()">⬇ خروجی تمپلیت‌ها</button>
       <button style="background:#8e44ad;color:white" onclick="document.getElementById('tplFileInput').click()">📂 بارگذاری تمپلیت</button>
+      <button style="background:#2980b9;color:white" onclick="document.getElementById('htmlTplFileInput').click()">🌐 ایمپورت HTML (AI)</button>
+      <button style="background:#16a085;color:white" onclick="copyAIHtmlPrompt()">📋 کپی پرامپت AI</button>
       <button class="btn-confirm" style="margin-right:auto" onclick="applyCurrentLiveTemplate()">✅ اعمال و ذخیره</button>
     </div>
   </div>
@@ -427,12 +459,36 @@ input:checked+.slider:before{transform:translateX(-20px)}
       <input type="file" id="fontBulkFileInput" accept=".ttf,.woff,.woff2,.otf" multiple>
     </div>
     <div style="background:#eef4fb;border:1px solid #bce0fd;border-radius:8px;padding:10px 12px;font-size:.78rem;color:#1e3a5f;line-height:1.7;margin-top:10px">
-      💡 فونت‌ها فقط در همین مرورگر (IndexedDB) ذخیره می‌شوند و بعد از بستن و باز کردن دوباره هم در دسترس هستند. اگر می‌خواهید با شخص دیگری به اشتراک بگذارید، فایل فونت را جداگانه بفرستید.
+      💡 فونت‌ها فقط در همین مرورگر (IndexedDB) ذخیره می‌شوند.
     </div>
     <div class="tmpl-sec-title">فونت‌های ذخیره‌شده (<span id="fontCount">0</span>)</div>
     <div id="fontList" class="font-list"></div>
     <div class="modal-btns" style="margin-top:22px">
       <button class="btn-cancel" onclick="closeModal('fontModal')">بستن</button>
+    </div>
+  </div>
+</div>
+
+<div id="tplMetaModal" class="modal-backdrop">
+  <div class="modal-box">
+    <h3>✏️ ویرایش اطلاعات تمپلیت</h3>
+    <div class="meta-row">
+      <div class="msec">
+        <label>نام تمپلیت:</label>
+        <input type="text" id="tplMetaName" placeholder="مثال: تمپلیت من">
+      </div>
+      <div class="msec">
+        <label>ایموجی:</label>
+        <input type="text" id="tplMetaIcon" placeholder="✨" maxlength="4" style="text-align:center;font-size:1.1rem">
+      </div>
+    </div>
+    <div class="msec">
+      <label>ایموجی‌های پیشنهادی:</label>
+      <div class="emoji-grid" id="tplMetaEmojiGrid"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('tplMetaModal')">انصراف</button>
+      <button class="btn-confirm" onclick="confirmEditTemplateMeta()">✅ ذخیره</button>
     </div>
   </div>
 </div>
@@ -565,6 +621,51 @@ input:checked+.slider:before{transform:translateX(-20px)}
 <script>
 mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
 
+/* =====================================================================
+   AI prompt for HTML template
+===================================================================== */
+const AI_HTML_PROMPT = `شما یک طراح قالب حرفه‌ای هستید. یک فایل HTML کامل و مستقل برای استفاده به عنوان «تمپلیت ظاهری» نرم‌افزار تبدیل Markdown→PDF/Word بسازید.
+
+قوانین بسیار مهم (دقیقاً رعایت کنید):
+1. کل فایل باید یک HTML معتبر و مستقل باشد (<!DOCTYPE html>، <html lang="fa" dir="rtl">، <head>، <body>).
+2. در <head> فقط یک <title> و یک تگ <style> باشد. هیچ فایل CSS/JS خارجی، هیچ فونت اینترنتی و هیچ @import نداشته باشید.
+3. داخل <body> یک <div id="preview"> با محتوای نمونه قرار دهید.
+4. تمام selector های CSS باید با #preview شروع شوند. مثال: #preview h1 ، #preview table th ، #preview .mermaid-wrapper ، #preview .img-wrapper ، #preview .katex ، #preview .katex-display.
+5. هرگز برای body ، html ، * ، :root ، :host استایل ندهید — فقط #preview و زیرمجموعه‌های آن.
+6. از @font-face استفاده نکنید (فونت‌های سیستمی مثل Tahoma، Segoe UI، Vazirmatn، Arial، Times New Roman، Courier New، Consolas استفاده کنید).
+7. برای المان‌های کد از فونت monospace استفاده کنید.
+8. برای #preview حتماً direction: rtl و text-align: right تنظیم کنید.
+
+المان‌هایی که باید استایل بدهید:
+- #preview (پس‌زمینه، رنگ متن، فونت، direction، padding)
+- #preview h1 ، #preview h2 ، #preview h3 (رنگ‌های متمایز، border-bottom، اندازه، font-family)
+- #preview h4 ، #preview h5 ، #preview h6
+- #preview p ، #preview ul ، #preview ol ، #preview li
+- #preview blockquote (پس‌زمینه + border-right)
+- #preview code (درون‌خطی) و #preview pre code (بلوک کد)
+- #preview table ، #preview th ، #preview td ، #preview tr:nth-child(even)
+- #preview strong ، #preview em ، #preview a
+- #preview hr
+- #preview img ، #preview .img-wrapper
+- #preview .mermaid-wrapper ، #preview .mermaid
+- #preview .mermaid-toolbar ، #preview .img-toolbar
+- #preview .katex ، #preview .katex-display ، #preview .katex * — فرمول‌ها direction: ltr و unicode-bidi: isolate، در حالت display text-align: center.
+
+محتوای نمونه داخل <div id="preview"> (اجباری):
+- یک <h1> ، یک <h2> ، یک <h3> با متن فارسی زیبا
+- یک پاراگراف شامل <strong> ، <em> ، <a href="#">لینک</a> ، <code>کد درون‌خطی</code>
+- یک <ul> با ۳ آیتم و یک <ol> با ۳ آیتم فارسی
+- یک <blockquote> با متن فارسی
+- یک <table> با هدر ۳ ستونی (لایه / مقاومت کششی / توضیح) و حداقل ۲ ردیف داده
+- یک <pre><code> با یک تابع پایتون ساده
+- یک <hr>
+- یک <p> شامل فرمول: <span class="katex">E = mc<sup>2</sup></span>
+
+طراحی باید مدرن، خوانا، حرفه‌ای، با کنتراست بالا و هماهنگی رنگی زیبا باشد. از gradient، box-shadow، border-radius و transition به‌صورت هنرمندانه استفاده کنید. فونت‌ها باید فارسی‌خوان باشند.
+
+خروجی: فقط کد HTML کامل. بدون هیچ توضیح اضافه.`;
+
+/* ============ Markdown / Mermaid / Math ============ */
 const mathExt = {
   name: 'math', level: 'inline',
   start(src){ const i = src.search(/\$|\\\(|\\\[/); return i < 0 ? undefined : i; },
@@ -614,7 +715,7 @@ let toastTimer=null;
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400);
 }
 
 /* ============ History ============ */
@@ -803,9 +904,18 @@ function highlightAndReplaceSearchTerm(root, term, replaceTerm, styles) {
 /* ============ Export/Load Project ============ */
 async function exportProject() {
   const projectData = {
-    version:"2.0", md:input.value, preview:preview.innerHTML,
+    version:"2.2", md:input.value, preview:preview.innerHTML,
     globalAlign:preview.style.textAlign, globalDir:preview.style.direction,
-    theme: { current: currentTemplate, values: getLiveTemplateForExport() }
+    theme: {
+      current: currentTemplate,
+      currentHtml: currentHtmlTemplate,
+      values: getLiveTemplateForExport(),
+      htmlTemplate: currentHtmlTemplate && htmlTemplates[currentHtmlTemplate]
+        ? { name: htmlTemplates[currentHtmlTemplate].name, icon: htmlTemplates[currentHtmlTemplate].icon, css: htmlTemplates[currentHtmlTemplate].css }
+        : null,
+      displayOverrides: templateDisplayOverrides,
+      hiddenBuiltins: [...hiddenBuiltins]
+    }
   };
   const json = JSON.stringify(projectData, null, 2);
   const suggested = "draft_project.jzv";
@@ -830,9 +940,27 @@ function loadProjectFile(file) {
         input.value = data.md; preview.innerHTML = data.preview;
         if (data.globalAlign) preview.style.textAlign = data.globalAlign;
         if (data.globalDir) preview.style.direction = data.globalDir;
-        if (data.theme && data.theme.values){
-          applyTemplateValues(data.theme.values);
-          if(data.theme.current && getAllTemplates()[data.theme.current]) currentTemplate = data.theme.current;
+        if (data.theme){
+          if(data.theme.displayOverrides) templateDisplayOverrides = { ...templateDisplayOverrides, ...data.theme.displayOverrides };
+          if(Array.isArray(data.theme.hiddenBuiltins)) data.theme.hiddenBuiltins.forEach(k => hiddenBuiltins.add(k));
+          if(data.theme.currentHtml && data.theme.htmlTemplate){
+            const id = data.theme.currentHtml;
+            if(!htmlTemplates[id]){
+              htmlTemplates[id] = {
+                id, type:'html', name: data.theme.htmlTemplate.name || 'وارداتی (پروژه)',
+                icon: data.theme.htmlTemplate.icon || HTML_TPL_ICON,
+                builtin: false, css: data.theme.htmlTemplate.css || ''
+              };
+              persistHtmlTemplates();
+            }
+            applyHtmlTemplate(id);
+            if(data.theme.values) applyTemplateValues(data.theme.values);
+          } else if(data.theme.current && getAllTemplates()[data.theme.current]){
+            applyTemplate(data.theme.current);
+            if(data.theme.values) applyTemplateValues(data.theme.values);
+          } else if(data.theme.values){
+            applyTemplateValues(data.theme.values);
+          }
           persistTemplates();
         }
         renderMathInElement(preview,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false});
@@ -1315,20 +1443,257 @@ let currentTemplate = 'default';
 let liveTemplateValues = {};
 let liveMermaidTheme = 'default';
 
+/* === NEW: per-template display overrides & hidden built-ins === */
+let templateDisplayOverrides = {};   // id -> { name?, icon? }  (فقط برای built-in ها)
+let hiddenBuiltins = new Set();      // ids of hidden built-ins
+
+/* ---- HTML Template State (AI Import) ---- */
+let htmlTemplates = {};
+let currentHtmlTemplate = null;
+const HTML_TPL_ICON = '🤖';
+
+/* Editing state for the meta modal */
+let tplMetaEditing = null; // { id, isHtml }
+const SUGGESTED_EMOJIS = ['📘','📗','📙','📕','📓','📔','📒','📝','✨','🌟','⭐','💫','🌙','☀️','🌈','🎨','🎭','🎓','🎯','🎪','🌿','🌱','🍃','🌸','🌺','🌻','🦋','🔥','💧','⚡','❄️','💎','🔮','🧿','🕹️','🎮','🎲','🧩','🤖','👾','🦄','🐉','🦅'];
+
 function getTemplateValues(tpl){ return { ...TEMPLATE_DEFAULTS, ...cleanTemplate(tpl) }; }
 function loadTemplatesFromStorage(){
   try{ const s = localStorage.getItem('jzv_custom_templates'); if(s) customTemplates = JSON.parse(s)||{}; }catch(e){}
   try{ const c = localStorage.getItem('jzv_current_template'); if(c) currentTemplate = c; }catch(e){}
+  try{ const h = localStorage.getItem('jzv_current_html_template'); if(h) currentHtmlTemplate = h; }catch(e){}
+  try{ const o = localStorage.getItem('jzv_template_display_overrides'); if(o) templateDisplayOverrides = JSON.parse(o)||{}; }catch(e){}
+  try{ const b = localStorage.getItem('jzv_hidden_builtins'); if(b) hiddenBuiltins = new Set(JSON.parse(b)||[]); }catch(e){}
+  loadHtmlTemplatesFromStorage();
 }
 function persistTemplates(){
   try{
     localStorage.setItem('jzv_custom_templates', JSON.stringify(customTemplates));
-    localStorage.setItem('jzv_current_template', currentTemplate);
+    localStorage.setItem('jzv_current_template', currentTemplate || '');
+    localStorage.setItem('jzv_current_html_template', currentHtmlTemplate || '');
+    localStorage.setItem('jzv_template_display_overrides', JSON.stringify(templateDisplayOverrides));
+    localStorage.setItem('jzv_hidden_builtins', JSON.stringify([...hiddenBuiltins]));
   }catch(e){}
+  persistHtmlTemplates();
 }
 function getAllTemplates(){ return { ...BUILTIN_TEMPLATES, ...customTemplates }; }
-function cleanTemplate(t){ const c = {...t}; delete c.id; delete c.name; delete c.icon; delete c.builtin; return c; }
+function cleanTemplate(t){ const c = {...t}; delete c.id; delete c.name; delete c.icon; delete c.builtin; delete c.type; delete c.css; delete c.demoHtml; return c; }
 
+/* نمایش نام/ایموجی هر تمپلیت با در نظر گرفتن override */
+function getTemplateDisplay(id, isHtml){
+  if (isHtml){
+    const t = htmlTemplates[id];
+    if (!t) return { name: id, icon: HTML_TPL_ICON };
+    return { name: t.name || 'تمپلیت HTML', icon: t.icon || HTML_TPL_ICON };
+  }
+  if (customTemplates[id]){
+    const t = customTemplates[id];
+    return { name: t.name || 'تمپلیت سفارشی', icon: t.icon || '✨' };
+  }
+  if (BUILTIN_TEMPLATES[id]){
+    const o = templateDisplayOverrides[id] || {};
+    return { name: o.name || BUILTIN_TEMPLATES[id].name, icon: o.icon || BUILTIN_TEMPLATES[id].icon };
+  }
+  return { name: id, icon: '🎨' };
+}
+
+/* ---- HTML Template Storage & Import ---- */
+function loadHtmlTemplatesFromStorage(){
+  try{ const s = localStorage.getItem('jzv_html_templates'); if(s) htmlTemplates = JSON.parse(s)||{}; }catch(e){ htmlTemplates = {}; }
+}
+function persistHtmlTemplates(){
+  try{ localStorage.setItem('jzv_html_templates', JSON.stringify(htmlTemplates)); }catch(e){}
+}
+function importHtmlTemplateFromInput(e){
+  const f = e.target.files[0];
+  if(f) importHtmlTemplateFile(f);
+  e.target.value = '';
+}
+function importHtmlTemplateFile(file){
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const html = ev.target.result;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const styleEls = doc.querySelectorAll('style');
+      let css = '';
+      styleEls.forEach(s => css += (s.textContent || '') + '\n');
+      if(!css.trim()){
+        alert('⚠️ هیچ تگ <style> در فایل پیدا نشد. لطفاً از پرامپت AI استفاده کنید تا فایل استاندارد بسازد.');
+        return;
+      }
+      const titleRaw = (doc.querySelector('title')?.textContent || file.name.replace(/\.html?$/i,'')).trim();
+      // ← NEW: از کاربر نام می‌پرسیم
+      let title = titleRaw || 'تمپلیت HTML';
+      const givenName = prompt('نام این تمپلیت HTML چیست؟\n(برای استفاده از نام پیش‌فرض Cancel بزنید)', title);
+      if (givenName !== null && givenName.trim()) title = givenName.trim();
+
+      const previewEl = doc.getElementById('preview');
+      const demoHtml = previewEl ? previewEl.innerHTML : '';
+      const id = 'html_' + Date.now();
+      htmlTemplates[id] = {
+        id, type: 'html', name: title, icon: HTML_TPL_ICON,
+        builtin: false, css, demoHtml,
+        importedAt: Date.now()
+      };
+      persistHtmlTemplates();
+      applyHtmlTemplate(id);
+      openModal('templateModal');
+      renderTemplateGrid(); renderTemplateEditor(); updateDeleteBtn();
+      showToast(`✅ تمپلیت «${title}» اضافه و اعمال شد`);
+    } catch(err){
+      alert('خطا در پردازش فایل HTML: ' + err.message);
+    }
+  };
+  r.readAsText(file);
+}
+function applyHtmlTemplate(id){
+  const tpl = htmlTemplates[id];
+  if(!tpl){ showToast('❌ تمپلیت HTML یافت نشد'); return; }
+  applyTemplateValues(getTemplateValues(BUILTIN_TEMPLATES.default));
+  let styleEl = document.getElementById('importedHtmlTemplateStyle');
+  if(!styleEl){
+    styleEl = document.createElement('style');
+    styleEl.id = 'importedHtmlTemplateStyle';
+  }
+  document.head.appendChild(styleEl);
+  styleEl.textContent = tpl.css || '';
+  currentHtmlTemplate = id;
+  currentTemplate = null;
+  persistTemplates();
+  showToast(`🎨 ${tpl.name} اعمال شد`);
+}
+function clearHtmlTemplate(){
+  const styleEl = document.getElementById('importedHtmlTemplateStyle');
+  if(styleEl) styleEl.textContent = '';
+  currentHtmlTemplate = null;
+}
+function copyAIHtmlPrompt(){
+  const done = () => showToast('📋 پرامپت کپی شد — آن را به هوش مصنوعی بدهید');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(AI_HTML_PROMPT).then(done).catch(() => fallbackCopy());
+  } else fallbackCopy();
+  function fallbackCopy(){
+    const ta = document.createElement('textarea');
+    ta.value = AI_HTML_PROMPT;
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch(e){ alert('کپی نشد — پرامپت را دستی از کنسول بردارید.'); }
+    document.body.removeChild(ta);
+  }
+}
+
+/* ============================================================
+   NEW: ویرایش و حذف هر تمپلیت (built-in / custom / html)
+============================================================ */
+function editTemplateMeta(id, isHtml){
+  let isBuiltin = false;
+  let current = { name: '', icon: '🎨' };
+  if (isHtml){
+    if (!htmlTemplates[id]) return showToast('❌ تمپلیت یافت نشد');
+    current = getTemplateDisplay(id, true);
+  } else if (customTemplates[id]){
+    current = getTemplateDisplay(id, false);
+  } else if (BUILTIN_TEMPLATES[id]){
+    isBuiltin = true;
+    current = getTemplateDisplay(id, false);
+  } else {
+    return showToast('❌ تمپلیت یافت نشد');
+  }
+
+  tplMetaEditing = { id, isHtml, isBuiltin };
+  document.getElementById('tplMetaName').value = current.name;
+  document.getElementById('tplMetaIcon').value = current.icon;
+
+  // پرشدن گرید ایموجی
+  const grid = document.getElementById('tplMetaEmojiGrid');
+  grid.innerHTML = '';
+  SUGGESTED_EMOJIS.forEach(em => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = em;
+    if (em === current.icon) b.classList.add('selected');
+    b.onclick = () => {
+      document.getElementById('tplMetaIcon').value = em;
+      grid.querySelectorAll('button').forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+    };
+    grid.appendChild(b);
+  });
+
+  openModal('tplMetaModal');
+  setTimeout(() => document.getElementById('tplMetaName').focus(), 80);
+}
+function confirmEditTemplateMeta(){
+  if (!tplMetaEditing) { closeModal('tplMetaModal'); return; }
+  const newName = document.getElementById('tplMetaName').value.trim();
+  const newIcon = document.getElementById('tplMetaIcon').value.trim() || '✨';
+  if (!newName){ alert('نام نمی‌تواند خالی باشد.'); return; }
+
+  const { id, isHtml, isBuiltin } = tplMetaEditing;
+  if (isHtml){
+    if (htmlTemplates[id]){
+      htmlTemplates[id].name = newName;
+      htmlTemplates[id].icon = newIcon;
+      persistHtmlTemplates();
+    }
+  } else if (customTemplates[id]){
+    customTemplates[id].name = newName;
+    customTemplates[id].icon = newIcon;
+    persistTemplates();
+  } else if (isBuiltin && BUILTIN_TEMPLATES[id]){
+    templateDisplayOverrides[id] = templateDisplayOverrides[id] || {};
+    templateDisplayOverrides[id].name = newName;
+    templateDisplayOverrides[id].icon = newIcon;
+    persistTemplates();
+  }
+  tplMetaEditing = null;
+  closeModal('tplMetaModal');
+  renderTemplateGrid();
+  renderTemplateEditor();
+  showToast('✏️ تمپلیت به‌روزرسانی شد');
+}
+function deleteTemplate(id, isHtml){
+  const disp = getTemplateDisplay(id, isHtml);
+  if (!confirm(`تمپلیت «${disp.name}» حذف شود؟\n(در صورت حذف تمپلیت پیش‌فرض، با دکمه «بازیابی پیش‌فرض‌ها» قابل برگشت است)`)) return;
+
+  if (isHtml){
+    delete htmlTemplates[id];
+    persistHtmlTemplates();
+    if (currentHtmlTemplate === id){
+      clearHtmlTemplate();
+      applyTemplate('default');
+    }
+  } else if (customTemplates[id]){
+    delete customTemplates[id];
+    persistTemplates();
+    if (currentTemplate === id) applyTemplate('default');
+  } else if (BUILTIN_TEMPLATES[id]){
+    hiddenBuiltins.add(id);
+    persistTemplates();
+    if (currentTemplate === id) applyTemplate('default');
+  }
+  renderTemplateGrid();
+  renderTemplateEditor();
+  updateDeleteBtn();
+  showToast('🗑 تمپلیت حذف شد');
+}
+function restoreHiddenBuiltins(){
+  if (hiddenBuiltins.size === 0 && Object.keys(templateDisplayOverrides).length === 0){
+    showToast('ℹ️ چیزی برای بازیابی نیست');
+    return;
+  }
+  if (!confirm('همه تمپلیت‌های پیش‌فرض بازیابی شوند و نام/ایموجی اصلی خود را برگردانند؟')) return;
+  hiddenBuiltins.clear();
+  templateDisplayOverrides = {};
+  persistTemplates();
+  renderTemplateGrid();
+  renderTemplateEditor();
+  showToast('🔄 تمپلیت‌های پیش‌فرض بازیابی شدند');
+}
+
+/* ---- Apply variable-based template ---- */
 function applyTemplateValues(values){
   if(!values) return;
   liveTemplateValues = { ...values };
@@ -1366,77 +1731,202 @@ function applyTemplateValues(values){
   }
 }
 function applyTemplate(name){
+  clearHtmlTemplate();
   const all = getAllTemplates(); const tpl = all[name];
   if(!tpl){ showToast('❌ تمپلیت یافت نشد'); return; }
   applyTemplateValues(getTemplateValues(tpl));
-  currentTemplate = name; persistTemplates();
-  showToast(`🎨 «${tpl.name}» اعمال شد`);
+  currentTemplate = name; currentHtmlTemplate = null;
+  persistTemplates();
+  showToast(`🎨 «${getTemplateDisplay(name, false).name}» اعمال شد`);
 }
 function openTemplateModal(){ renderTemplateGrid(); renderTemplateEditor(); openModal('templateModal'); }
 
 function renderTemplateGrid(){
   const grid = document.getElementById('templateGrid');
   const all = getAllTemplates(); grid.innerHTML = '';
+
+  // variable-based templates
   Object.keys(all).forEach(key => {
+    // پنهان‌کردن built-in های حذف‌شده
+    if (hiddenBuiltins.has(key) && BUILTIN_TEMPLATES[key]) return;
+
     const t = all[key];
+    const disp = getTemplateDisplay(key, false);
+    const isActive = key === currentTemplate && !currentHtmlTemplate;
+    const isBuiltin = !!BUILTIN_TEMPLATES[key];
+
     const card = document.createElement('div');
-    card.className = 'template-card' + (key === currentTemplate ? ' active' : '');
-    card.innerHTML = `${!t.builtin ? '<span class="tc-badge">سفارشی</span>' : ''}<div class="tc-icon">${t.icon || '🎨'}</div><div class="tc-name" title="${t.name}">${t.name}</div>`;
+    card.className = 'template-card' + (isActive ? ' active' : '');
+    card.innerHTML = `
+      ${!isBuiltin ? '<span class="tc-badge">سفارشی</span>' : (templateDisplayOverrides[key] ? '<span class="tc-badge" style="background:#f39c12">ویرایش‌شده</span>' : '')}
+      <div class="tc-actions">
+        <button type="button" title="ویرایش نام و ایموجی" onclick="event.stopPropagation();editTemplateMeta('${key}', false)">✏️</button>
+        <button type="button" class="del" title="حذف تمپلیت" onclick="event.stopPropagation();deleteTemplate('${key}', false)">🗑</button>
+      </div>
+      <div class="tc-icon">${disp.icon}</div>
+      <div class="tc-name" title="${disp.name}">${disp.name}</div>`;
     card.onclick = () => { applyTemplate(key); renderTemplateGrid(); renderTemplateEditor(); updateDeleteBtn(); };
     grid.appendChild(card);
   });
+
+  // HTML templates (AI)
+  Object.keys(htmlTemplates).forEach(key => {
+    const t = htmlTemplates[key];
+    const disp = getTemplateDisplay(key, true);
+    const isActive = key === currentHtmlTemplate;
+    const card = document.createElement('div');
+    card.className = 'template-card' + (isActive ? ' active' : '');
+    card.innerHTML = `
+      <span class="tc-badge" style="background:#8e44ad">HTML</span>
+      <div class="tc-actions">
+        <button type="button" title="ویرایش نام و ایموجی" onclick="event.stopPropagation();editTemplateMeta('${key}', true)">✏️</button>
+        <button type="button" class="del" title="حذف تمپلیت" onclick="event.stopPropagation();deleteTemplate('${key}', true)">🗑</button>
+      </div>
+      <div class="tc-icon">${disp.icon}</div>
+      <div class="tc-name" title="${disp.name}">${disp.name}</div>`;
+    card.onclick = () => { applyHtmlTemplate(key); renderTemplateGrid(); renderTemplateEditor(); updateDeleteBtn(); };
+    grid.appendChild(card);
+  });
+
+  // Add new
   const addCard = document.createElement('div');
   addCard.className = 'template-card add-new';
   addCard.innerHTML = '<div class="tc-icon">➕</div><div class="tc-name">تمپلیت جدید</div>';
   addCard.onclick = () => createNewTemplateFromLive();
   grid.appendChild(addCard);
+
   updateDeleteBtn();
 }
 function updateDeleteBtn(){
   const btn = document.getElementById('deleteTplBtn');
-  const isBuiltin = !!BUILTIN_TEMPLATES[currentTemplate];
-  btn.disabled = isBuiltin; btn.style.opacity = isBuiltin ? '.4' : '1';
-  btn.style.cursor = isBuiltin ? 'not-allowed' : 'pointer';
+  if(!btn) return;
+  const hasActive = currentHtmlTemplate || customTemplates[currentTemplate] || BUILTIN_TEMPLATES[currentTemplate];
+  btn.disabled = !hasActive;
+  btn.style.opacity = hasActive ? '1' : '.4';
+  btn.style.cursor = hasActive ? 'pointer' : 'not-allowed';
 }
+
 function renderTemplateEditor(){
   const ed = document.getElementById('templateEditor'); ed.innerHTML = '';
+
+  // ---- HTML template: CSS editor ----
+  if(currentHtmlTemplate && htmlTemplates[currentHtmlTemplate]){
+    const tpl = htmlTemplates[currentHtmlTemplate];
+    const disp = getTemplateDisplay(currentHtmlTemplate, true);
+
+    const h = document.createElement('div');
+    h.className = 'tpl-group';
+    h.innerHTML = `✏️ ویرایش CSS تمپلیت HTML — <span style="color:#8e44ad">${disp.icon} ${disp.name}</span>`;
+    ed.appendChild(h);
+
+    const note = document.createElement('div');
+    note.style.cssText = 'grid-column:1/-1;font-size:.76rem;color:#8e44ad;background:#f5ebf8;border:1px solid #e0c8e8;border-radius:6px;padding:8px 10px;line-height:1.7';
+    note.textContent = '💡 این CSS روی پیش‌نمایش اعمال می‌شود. تغییرات به‌صورت زنده ذخیره می‌شوند. برای نام/ایموجی از دکمه ✏️ روی کارت استفاده کنید.';
+    ed.appendChild(note);
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'grid-column:1/-1';
+
+    const ta = document.createElement('textarea');
+    ta.spellcheck = false;
+    ta.style.cssText = 'width:100%;min-height:320px;padding:12px;font-family:Courier New,monospace;font-size:.8rem;border:1.5px solid #ddd;border-radius:8px;direction:ltr;text-align:left;line-height:1.55;outline:none;resize:vertical';
+    ta.value = tpl.css || '';
+    let deb;
+    ta.oninput = () => {
+      clearTimeout(deb);
+      deb = setTimeout(() => {
+        tpl.css = ta.value;
+        const styleEl = document.getElementById('importedHtmlTemplateStyle');
+        if(styleEl) styleEl.textContent = tpl.css;
+        persistHtmlTemplates();
+      }, 300);
+    };
+    wrap.appendChild(ta);
+
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;gap:8px;margin-top:8px;flex-wrap:wrap';
+
+    const bEdit = document.createElement('button');
+    bEdit.style.cssText = 'background:#f39c12;color:white;padding:6px 12px;font-size:.8rem';
+    bEdit.textContent = '✏️ ویرایش نام/ایموجی';
+    bEdit.onclick = () => editTemplateMeta(currentHtmlTemplate, true);
+
+    const b1 = document.createElement('button');
+    b1.style.cssText = 'background:#2980b9;color:white;padding:6px 12px;font-size:.8rem';
+    b1.textContent = '🌐 ایمپورت HTML جدید';
+    b1.onclick = () => document.getElementById('htmlTplFileInput').click();
+
+    const b2 = document.createElement('button');
+    b2.style.cssText = 'background:#16a085;color:white;padding:6px 12px;font-size:.8rem';
+    b2.textContent = '📋 کپی پرامپت AI';
+    b2.onclick = copyAIHtmlPrompt;
+
+    actions.appendChild(bEdit);
+    if(tpl.demoHtml){
+      const b3 = document.createElement('button');
+      b3.style.cssText = 'background:#9b59b6;color:white;padding:6px 12px;font-size:.8rem';
+      b3.textContent = '🎬 بارگذاری محتوای نمونه';
+      b3.onclick = () => {
+        if(!confirm('محتوای نمونه جایگزین پیش‌نمایش فعلی می‌شود. ادامه؟')) return;
+        preview.innerHTML = tpl.demoHtml;
+        preview.querySelectorAll('pre code.language-mermaid').forEach(b => {
+          const code = b.textContent;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'mermaid-wrapper';
+          wrapper.setAttribute('contenteditable','false');
+          wrapper.innerHTML = `<div class="mermaid" data-original-code="${code.replace(/"/g,'&quot;')}">${code}</div>`;
+          b.parentElement.parentElement.replaceChild(wrapper, b.parentElement);
+        });
+        processMermaidDiagrams();
+        saveState();
+        showToast('🎬 محتوای نمونه بارگذاری شد');
+      };
+      actions.appendChild(b3);
+    }
+    actions.appendChild(b1); actions.appendChild(b2);
+    wrap.appendChild(actions);
+    ed.appendChild(wrap);
+    return;
+  }
+
+  // ---- Variable template editor ----
   const fontOpts = getAllFontOptions();
   TEMPLATE_SCHEMA.forEach(grp => {
     const h = document.createElement('div'); h.className = 'tpl-group'; h.textContent = grp.group; ed.appendChild(h);
     grp.fields.forEach(f => {
       const wrap = document.createElement('div'); wrap.className = 'tpl-field';
       const lbl = document.createElement('label'); lbl.textContent = f.label;
-      let input;
+      let inp;
       if(f.type === 'color'){
-        input = document.createElement('input'); input.type = 'color';
-        input.value = normalizeColor(liveTemplateValues[f.key]) || '#000000';
-        input.oninput = () => { liveTemplateValues[f.key] = input.value; applyLiveField(f.key, input.value); };
+        inp = document.createElement('input'); inp.type = 'color';
+        inp.value = normalizeColor(liveTemplateValues[f.key]) || '#000000';
+        inp.oninput = () => { liveTemplateValues[f.key] = inp.value; applyLiveField(f.key, inp.value); };
       } else if(f.type === 'font'){
-        input = document.createElement('select');
+        inp = document.createElement('select');
         if(!f.required){
-          const o = document.createElement('option'); o.value = ''; o.textContent = '(ارث از بدنه)'; input.appendChild(o);
+          const o = document.createElement('option'); o.value = ''; o.textContent = '(ارث از بدنه)'; inp.appendChild(o);
           if(!liveTemplateValues[f.key]) o.selected = true;
         }
         fontOpts.forEach(o => {
           const op = document.createElement('option'); op.value = o.value; op.textContent = o.label;
           if(liveTemplateValues[f.key] === o.value) op.selected = true;
-          input.appendChild(op);
+          inp.appendChild(op);
         });
-        input.onchange = () => { liveTemplateValues[f.key] = input.value; applyLiveField(f.key, input.value); };
+        inp.onchange = () => { liveTemplateValues[f.key] = inp.value; applyLiveField(f.key, inp.value); };
       } else if(f.type === 'select'){
-        input = document.createElement('select');
+        inp = document.createElement('select');
         (f.options||[]).forEach(o => {
           const op = document.createElement('option'); op.value = o.value; op.textContent = o.label;
           if(liveTemplateValues[f.key] === o.value) op.selected = true;
-          input.appendChild(op);
+          inp.appendChild(op);
         });
-        input.onchange = () => { liveTemplateValues[f.key] = input.value; applyLiveField(f.key, input.value); };
+        inp.onchange = () => { liveTemplateValues[f.key] = inp.value; applyLiveField(f.key, inp.value); };
       } else {
-        input = document.createElement('input'); input.type = 'text';
-        input.value = liveTemplateValues[f.key] ?? '';
-        input.oninput = () => { liveTemplateValues[f.key] = input.value; applyLiveField(f.key, input.value); };
+        inp = document.createElement('input'); inp.type = 'text';
+        inp.value = liveTemplateValues[f.key] ?? '';
+        inp.oninput = () => { liveTemplateValues[f.key] = inp.value; applyLiveField(f.key, inp.value); };
       }
-      wrap.appendChild(lbl); wrap.appendChild(input); ed.appendChild(wrap);
+      wrap.appendChild(lbl); wrap.appendChild(inp); ed.appendChild(wrap);
     });
   });
 }
@@ -1489,22 +1979,30 @@ function createNewTemplateFromLive(){
   if(!name || !name.trim()) return;
   const id = 'custom_' + Date.now();
   customTemplates[id] = { id, name: name.trim(), icon: '✨', builtin: false, ...liveTemplateValues };
-  currentTemplate = id; persistTemplates();
+  currentTemplate = id; currentHtmlTemplate = null;
+  persistTemplates();
   renderTemplateGrid(); renderTemplateEditor(); updateDeleteBtn();
-  showToast('✅ تمپلیت جدید ساخته و در حافظه مرورگر ذخیره شد');
+  showToast('✅ تمپلیت جدید ساخته و ذخیره شد');
 }
 function deleteCurrentTemplate(){
-  if(BUILTIN_TEMPLATES[currentTemplate]){ showToast('❌ تمپلیت‌های پیش‌فرض حذف نمی‌شوند'); return; }
-  if(!customTemplates[currentTemplate]) return;
-  if(!confirm('این تمپلیت حذف شود؟')) return;
-  delete customTemplates[currentTemplate];
-  applyTemplate('default'); persistTemplates();
-  renderTemplateGrid(); renderTemplateEditor();
-  showToast('🗑 تمپلیت حذف شد');
+  if(currentHtmlTemplate) return deleteTemplate(currentHtmlTemplate, true);
+  if(customTemplates[currentTemplate] || BUILTIN_TEMPLATES[currentTemplate]) return deleteTemplate(currentTemplate, false);
+  showToast('❌ تمپلیتی برای حذف وجود ندارد');
 }
-function applyCurrentLiveTemplate(){ persistTemplates(); showToast('✅ تمپلیت اعمال و ذخیره شد'); closeModal('templateModal'); }
+function applyCurrentLiveTemplate(){
+  if(currentHtmlTemplate && htmlTemplates[currentHtmlTemplate]) persistHtmlTemplates();
+  else persistTemplates();
+  showToast('✅ تمپلیت اعمال و ذخیره شد');
+  closeModal('templateModal');
+}
 function exportTemplatesJSON(){
-  const data = { version:1, templates: { ...BUILTIN_TEMPLATES, ...customTemplates } };
+  const data = {
+    version: 2,
+    templates: { ...BUILTIN_TEMPLATES, ...customTemplates },
+    htmlTemplates,
+    displayOverrides: templateDisplayOverrides,
+    hiddenBuiltins: [...hiddenBuiltins]
+  };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
   saveAs(blob, 'jzv_templates.json'); showToast('⬇ فایل تمپلیت‌ها دانلود شد');
 }
@@ -1514,13 +2012,27 @@ function importTemplatesJSON(e){
   r.onload = ev => {
     try{
       const data = JSON.parse(ev.target.result);
-      if(!data.templates) throw new Error('ساختار فایل نامعتبر');
+      if(!data.templates && !data.htmlTemplates) throw new Error('ساختار فایل نامعتبر');
       let count = 0;
-      Object.entries(data.templates).forEach(([k, v]) => {
-        if(BUILTIN_TEMPLATES[k]) return;
-        const id = v.id || ('custom_' + Date.now() + '_' + Math.random().toString(36).slice(2,7));
-        customTemplates[id] = { ...v, id, builtin:false }; count++;
-      });
+      if(data.templates){
+        Object.entries(data.templates).forEach(([k, v]) => {
+          if(BUILTIN_TEMPLATES[k]) return;
+          const id = v.id || ('custom_' + Date.now() + '_' + Math.random().toString(36).slice(2,7));
+          customTemplates[id] = { ...v, id, builtin:false }; count++;
+        });
+      }
+      if(data.htmlTemplates){
+        Object.entries(data.htmlTemplates).forEach(([k, v]) => {
+          if(!htmlTemplates[k]){ htmlTemplates[k] = { ...v, builtin:false }; count++; }
+        });
+        persistHtmlTemplates();
+      }
+      if(data.displayOverrides){
+        templateDisplayOverrides = { ...templateDisplayOverrides, ...data.displayOverrides };
+      }
+      if(Array.isArray(data.hiddenBuiltins)){
+        data.hiddenBuiltins.forEach(k => hiddenBuiltins.add(k));
+      }
       persistTemplates(); renderTemplateGrid(); renderTemplateEditor();
       showToast(`✅ ${count} تمپلیت اضافه شد`);
     }catch(err){ alert('خطا: ' + err.message); }
@@ -1773,9 +2285,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   loadTemplatesFromStorage();
   refreshAllFontDropdowns();
-  applyTemplate(currentTemplate);
   await loadAndRegisterFonts();
-  applyTemplateValues(liveTemplateValues);
+
+  if(currentHtmlTemplate && htmlTemplates[currentHtmlTemplate]){
+    applyHtmlTemplate(currentHtmlTemplate);
+  } else {
+    const allTemplates = getAllTemplates();
+    if(allTemplates[currentTemplate]) applyTemplate(currentTemplate);
+    else applyTemplate('default');
+  }
 
   const fontDropZone = document.getElementById('fontDropZone');
   if(fontDropZone){
@@ -1792,6 +2310,23 @@ window.addEventListener('DOMContentLoaded', async () => {
     bulkInput.addEventListener('change', async function(){
       await handleFontFiles(Array.from(this.files || []));
       this.value = '';
+    });
+  }
+
+  // فیلد ایموجی: انتخاب با Enter و پاک‌کردن selected های گرید
+  const iconInput = document.getElementById('tplMetaIcon');
+  if (iconInput){
+    iconInput.addEventListener('input', () => {
+      const v = iconInput.value.trim();
+      document.querySelectorAll('#tplMetaEmojiGrid button').forEach(x => {
+        x.classList.toggle('selected', x.textContent === v);
+      });
+    });
+  }
+  const nameInput = document.getElementById('tplMetaName');
+  if (nameInput){
+    nameInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter'){ e.preventDefault(); confirmEditTemplateMeta(); }
     });
   }
 
