@@ -12,9 +12,27 @@
 <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
+:root{
+  --pv-bg:#ffffff;--pv-text:#222222;
+  --pv-h1-color:#1e3a5f;--pv-h1-border:#1e3a5f;--pv-h1-font:'Segoe UI',Tahoma,sans-serif;--pv-h1-size:1.6rem;
+  --pv-h2-color:#2c3e50;--pv-h2-border:#bbbbbb;--pv-h2-font:'Segoe UI',Tahoma,sans-serif;--pv-h2-size:1.3rem;
+  --pv-h3-color:#34495e;--pv-h3-font:'Segoe UI',Tahoma,sans-serif;--pv-h3-size:1.1rem;
+  --pv-bold-color:#1e3a5f;--pv-italic-color:inherit;--pv-link-color:#2980b9;
+  --pv-math-color:#222222;--pv-math-size:1em;
+  --pv-quote-bg:#eef4fb;--pv-quote-border:#1e3a5f;--pv-quote-text:#2c3e50;
+  --pv-quote-font:'Segoe UI',Tahoma,sans-serif;--pv-quote-size:1rem;
+  --pv-inline-code-bg:#f4f4f4;--pv-inline-code-text:#222222;
+  --pv-inline-code-font:'Courier New',monospace;--pv-inline-code-size:0.9em;
+  --pv-code-bg:#2d2d2d;--pv-code-text:#f8f8f2;
+  --pv-code-font:'Courier New',monospace;--pv-code-size:0.9rem;
+  --pv-table-header-bg:#1e3a5f;--pv-table-header-text:#ffffff;
+  --pv-table-border:#dddddd;--pv-table-alt-bg:#f7f9fc;
+  --pv-table-font:'Segoe UI',Tahoma,sans-serif;--pv-table-size:0.95rem;
+  --pv-hr-color:#dddddd;
+  --pv-font-family:'Segoe UI',Tahoma,sans-serif;--pv-font-size:1rem;--pv-line-height:1.9;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f0f2f5;color:#222;direction:rtl}
-
 header{background:#1e3a5f;color:white;padding:12px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 header h1{font-size:1.1rem;flex:1;white-space:nowrap}
 .btn-group{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
@@ -33,7 +51,8 @@ button:hover{opacity:.85}
 .btn-fullview.active{background:#f39c12;color:#1e3a5f}
 .btn-sync{background:#27ae60;color:white}
 .btn-sync.active{background:#f39c12;color:#1e3a5f}
-
+.btn-theme{background:#8e44ad;color:white}
+.btn-fonts{background:#e67e22;color:white}
 .container{display:flex;gap:0;padding:14px;height:calc(100vh - 64px);transition:height .2s}
 .panel{background:white;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.1);display:flex;flex-direction:column;overflow:hidden}
 .panel:first-of-type{flex:1}
@@ -42,42 +61,26 @@ button:hover{opacity:.85}
 .resizer:hover{background:#1e3a5f}
 .resizer::before{content:'⋮';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#888;font-size:1.1rem;letter-spacing:-4px}
 .panel-header{background:#f8f9fa;padding:9px 14px;font-weight:bold;font-size:.88rem;border-bottom:1px solid #e5e5e5;color:#555;display:flex;align-items:center;gap:6px}
-
 body.fullview-active header{display:none !important}
 body.fullview-active .container{height:100vh;padding:8px}
-
 .container.md-fullview #rightPanel,
 .container.md-fullview #resizer{display:none!important}
 .container.md-fullview #leftPanel{flex:1 1 100%!important;border-radius:10px}
 .container.md-fullview #leftPanel > .panel-header{display:none}
 .container.md-fullview #mdInput{font-size:1rem;line-height:2.1;padding:26px}
-
 .container.preview-fullview #leftPanel,
 .container.preview-fullview #resizer{display:none!important}
 .container.preview-fullview #rightPanel{flex:1 1 100%!important;border-radius:10px}
 .container.preview-fullview #rightPanel > .panel-header{display:none}
 .container.preview-fullview #preview{font-size:1.05rem;line-height:2.05;padding:24px}
-
-.fv-bar{
-  display:none;
-  background:linear-gradient(90deg,#1e3a5f 0%,#2c3e50 100%);
-  color:white;padding:8px 14px;gap:6px;flex-wrap:wrap;align-items:center;
-  border-bottom:3px solid #f39c12;
-  box-shadow:0 2px 10px rgba(0,0,0,.15);
-  position:sticky;top:0;z-index:60;
-  flex-shrink:0;
-}
+.fv-bar{display:none;background:linear-gradient(90deg,#1e3a5f 0%,#2c3e50 100%);color:white;padding:8px 14px;gap:6px;flex-wrap:wrap;align-items:center;border-bottom:3px solid #f39c12;box-shadow:0 2px 10px rgba(0,0,0,.15);position:sticky;top:0;z-index:60;flex-shrink:0}
 .container.md-fullview .md-fv-bar{display:flex}
 .container.preview-fullview .preview-fv-bar{display:flex}
 .fv-bar button{background:rgba(255,255,255,.15);color:white;padding:5px 10px;font-size:.78rem;border-radius:5px;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:inherit;transition:background .2s}
 .fv-bar button:hover{background:rgba(255,255,255,.32)}
-.fv-bar button.danger{background:rgba(231,76,60,.8)}
-.fv-bar button.danger:hover{background:rgba(231,76,60,1)}
 .fv-bar button.accent{background:rgba(243,156,18,.9);color:#1e3a5f;font-weight:bold}
-.fv-bar button.accent:hover{background:#f39c12}
 .fv-bar .tb-sep{width:1px;height:22px;background:rgba(255,255,255,.25);margin:0 4px}
 .fv-bar .fv-badge{font-size:.72rem;color:rgba(255,255,255,.72);margin-right:auto;padding-right:6px}
-
 .search-panel{display:none;background:#fcfcfc;border-bottom:2px solid #e2e8f0;padding:14px 18px;flex-direction:column;gap:12px}
 .search-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
 .search-field{display:flex;flex-direction:column;gap:4px}
@@ -87,7 +90,6 @@ body.fullview-active .container{height:100vh;padding:8px}
 .search-format-row{display:flex;flex-wrap:wrap;align-items:center;gap:14px;border-top:1px dashed #e2e8f0;padding-top:10px}
 .search-checkbox{display:flex;align-items:center;gap:5px;font-size:0.82rem;cursor:pointer;user-select:none}
 .search-checkbox input{cursor:pointer}
-
 #selectionToolbar{display:none;position:fixed;z-index:9999;background:#1e3a5f;border-radius:8px;padding:6px 8px;gap:6px;box-shadow:0 4px 20px rgba(0,0,0,.3);align-items:center}
 #selectionToolbar button{background:rgba(255,255,255,.15);color:white;border-radius:5px;padding:5px 8px;font-size:.8rem}
 #selectionToolbar button:hover{background:rgba(255,255,255,.3)}
@@ -95,33 +97,43 @@ body.fullview-active .container{height:100vh;padding:8px}
 #selectionToolbar select option{background:#1e3a5f;color:white}
 #selectionToolbar .tb-sep{width:1px;background:rgba(255,255,255,.2);align-self:stretch;margin:0 2px}
 #mdInput{flex:1;border:none;outline:none;padding:16px;font-size:.93rem;font-family:'Courier New',monospace;resize:none;direction:rtl;line-height:1.8}
-#preview{flex:1;padding:20px;overflow-y:auto;line-height:1.9;font-size:1rem}
-#preview h1{font-size:1.6rem;border-bottom:2px solid #1e3a5f;padding-bottom:6px;margin:16px 0 10px;color:#1e3a5f}
-#preview h2{font-size:1.3rem;border-bottom:1px solid #bbb;padding-bottom:4px;margin:14px 0 8px;color:#2c3e50}
-#preview h3{font-size:1.1rem;margin:12px 0 6px;color:#34495e}
+#preview{flex:1;padding:20px;overflow-y:auto;line-height:var(--pv-line-height);font-size:var(--pv-font-size);font-family:var(--pv-font-family);background:var(--pv-bg);color:var(--pv-text)}
+#preview h1{font-size:var(--pv-h1-size);font-family:var(--pv-h1-font);border-bottom:2px solid var(--pv-h1-border);padding-bottom:6px;margin:16px 0 10px;color:var(--pv-h1-color)}
+#preview h2{font-size:var(--pv-h2-size);font-family:var(--pv-h2-font);border-bottom:1px solid var(--pv-h2-border);padding-bottom:4px;margin:14px 0 8px;color:var(--pv-h2-color)}
+#preview h3{font-size:var(--pv-h3-size);font-family:var(--pv-h3-font);margin:12px 0 6px;color:var(--pv-h3-color)}
 #preview p{margin-bottom:10px}
 #preview ul,#preview ol{padding-right:24px;margin-bottom:10px}
 #preview li{margin-bottom:4px}
-#preview blockquote{border-right:4px solid #1e3a5f;background:#eef4fb;padding:10px 16px;margin:10px 0;border-radius:0 6px 6px 0;color:#2c3e50}
-#preview code{background:#f4f4f4;padding:2px 6px;border-radius:4px;font-family:'Courier New',monospace;font-size:.9em}
-#preview pre{background:#2d2d2d;color:#f8f8f2;padding:14px;border-radius:8px;overflow-x:auto;margin-bottom:12px}
-#preview pre code{background:none;color:inherit;padding:0}
-#preview table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}
-#preview th{background:#1e3a5f;color:white;padding:10px 14px;text-align:right}
-#preview td{padding:8px 14px;border:1px solid #ddd}
-#preview tr:nth-child(even){background:#f7f9fc}
-#preview hr{border:none;border-top:2px solid #ddd;margin:16px 0}
-#preview strong{color:#1e3a5f}
-#preview img{max-width:100%;border-radius:6px}
-#preview .katex-display{margin:12px 0;overflow-x:auto;overflow-y:hidden}
-
-/* 🔥 محافظت از مودال‌های غیرقابل ویرایش */
-.mermaid-wrapper[contenteditable="false"],
-.img-wrapper[contenteditable="false"]{
-  user-select:none;
+#preview blockquote{border-right:4px solid var(--pv-quote-border);background:var(--pv-quote-bg);padding:10px 16px;margin:10px 0;border-radius:0 6px 6px 0;color:var(--pv-quote-text);font-family:var(--pv-quote-font);font-size:var(--pv-quote-size)}
+#preview code{background:var(--pv-inline-code-bg);color:var(--pv-inline-code-text);padding:2px 6px;border-radius:4px;font-family:var(--pv-inline-code-font);font-size:var(--pv-inline-code-size)}
+#preview pre{background:var(--pv-code-bg);color:var(--pv-code-text);padding:14px;border-radius:8px;overflow-x:auto;margin-bottom:12px;font-family:var(--pv-code-font);font-size:var(--pv-code-size)}
+#preview pre code{background:none;color:inherit;padding:0;font-family:inherit;font-size:inherit}
+#preview table{width:100%;border-collapse:collapse;margin:12px 0;font-size:var(--pv-table-size);font-family:var(--pv-table-font)}
+#preview th{background:var(--pv-table-header-bg);color:var(--pv-table-header-text);padding:10px 14px;text-align:right}
+#preview td{padding:8px 14px;border:1px solid var(--pv-table-border)}
+#preview tr:nth-child(even){background:var(--pv-table-alt-bg)}
+#preview hr{border:none;border-top:2px solid var(--pv-hr-color);margin:16px 0}
+#preview strong{color:var(--pv-bold-color)}
+#preview em{color:var(--pv-italic-color)}
+#preview a{color:var(--pv-link-color)}
+/* 🔥 فرمول‌ها: همیشه LTR و ایزوله از متن فارسی اطراف */
+#preview .katex,
+#preview .katex *{
+  direction:ltr;
+  unicode-bidi:isolate;
+  color:var(--pv-math-color);
 }
-
-/* Mermaid */
+#preview .katex{font-size:var(--pv-math-size)}
+#preview .katex-display{
+  direction:ltr;
+  unicode-bidi:isolate;
+  text-align:center;
+  margin:12px 0;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+#preview img{max-width:100%;border-radius:6px}
+.mermaid-wrapper[contenteditable="false"],.img-wrapper[contenteditable="false"]{user-select:none}
 .mermaid-wrapper{position:relative;display:block;margin:16px 0;padding-top:38px}
 .mermaid-toolbar{position:absolute;top:0;right:0;left:0;height:36px;background:#16a085;border-radius:6px 6px 0 0;display:none;align-items:center;gap:8px;padding:0 10px;z-index:10}
 .mermaid-wrapper:hover .mermaid-toolbar{display:flex}
@@ -131,12 +143,9 @@ body.fullview-active .container{height:100vh;padding:8px}
 .mermaid-toolbar button{background:rgba(255,255,255,.2);color:white;padding:3px 9px;font-size:.75rem;border-radius:4px;white-space:nowrap}
 .mermaid-toolbar button:hover{background:rgba(255,255,255,.35)}
 .mermaid-toolbar button.edit{background:rgba(243,156,18,.85);color:#1e3a5f;font-weight:bold}
-.mermaid-toolbar button.edit:hover{background:#f39c12}
 .mermaid-toolbar .tb-sep{width:1px;height:20px;background:rgba(255,255,255,.25);margin:0 2px}
 .mermaid{display:flex;justify-content:center;margin:0;background:white;padding:12px;border-radius:0 0 8px 8px;border:1px solid #e2e8f0;border-top:none;overflow-x:auto}
 .mermaid svg{max-width:100%;height:auto;display:block;margin:0 auto;transition:max-width .15s}
-
-/* Image */
 .img-wrapper{position:relative;display:block;margin:12px 0;padding-top:38px}
 .img-toolbar{position:absolute;top:0;right:0;left:0;height:36px;background:#1e3a5f;border-radius:6px 6px 0 0;display:none;align-items:center;gap:6px;padding:0 10px;z-index:10}
 .img-wrapper:hover .img-toolbar{display:flex}
@@ -151,8 +160,6 @@ body.fullview-active .container{height:100vh;padding:8px}
 .img-inner.align-center{justify-content:center}
 .img-inner.align-left{justify-content:flex-start}
 .img-inner img{display:block;border-radius:4px}
-
-/* Modals */
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;align-items:center;justify-content:center}
 .modal-backdrop.open{display:flex}
 .modal-box{background:white;border-radius:14px;padding:28px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.25);direction:rtl}
@@ -171,9 +178,7 @@ body.fullview-active .container{height:100vh;padding:8px}
 .drop-zone{border:2px dashed #bbb;border-radius:8px;padding:18px;text-align:center;color:#888;font-size:.85rem;cursor:pointer;transition:all .2s;position:relative}
 .drop-zone:hover,.drop-zone.dragover{border-color:#1e3a5f;background:#f0f5ff;color:#1e3a5f}
 .drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.drop-zone.small{padding:12px}
 .remove-cover-img{display:inline-block;margin-top:6px;background:#ecf0f1;color:#c0392b;padding:4px 10px;border-radius:6px;font-size:.78rem;cursor:pointer;border:none}
-
 .pdf-sec-title{font-weight:bold;font-size:.88rem;color:#1e3a5f;border-bottom:1px solid #e0e8f4;padding-bottom:6px;margin:16px 0 10px}
 .toggle-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:#f8f9fa;margin-bottom:8px}
 .toggle-row label.lbl{flex:1;font-size:.88rem;color:#444;cursor:pointer;margin:0}
@@ -192,19 +197,40 @@ input:checked+.slider:before{transform:translateX(-20px)}
 .color-row{display:flex;align-items:center;gap:8px}
 .color-row input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radius:5px;border:1.5px solid #ddd}
 .color-row input[type=text]{flex:1;padding:7px 10px;border:1.5px solid #ddd;border-radius:7px;font-size:.85rem;font-family:inherit;outline:none}
-.inline-toggle{display:flex;align-items:center;gap:8px;font-size:.83rem;color:#444}
-.inline-toggle .switch{width:34px;height:19px}
-.inline-toggle .slider:before{height:13px;width:13px}
-.inline-toggle input:checked+.slider:before{transform:translateX(-15px)}
 .range-row{display:flex;align-items:center;gap:10px}
 .range-row input[type=range]{flex:1;accent-color:#1e3a5f}
 .range-row .rv{min-width:42px;text-align:left;font-size:.8rem;color:#555;font-family:'Courier New',monospace}
-
+.template-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px;margin-bottom:6px}
+.template-card{background:#f8f9fa;border:2px solid #e0e0e0;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;user-select:none;position:relative}
+.template-card:hover{border-color:#1e3a5f;transform:translateY(-2px)}
+.template-card.active{border-color:#f39c12;background:#fff8ed;box-shadow:0 4px 12px rgba(243,156,18,.25)}
+.template-card .tc-icon{font-size:1.5rem;margin-bottom:4px}
+.template-card .tc-name{font-size:.78rem;color:#555;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.template-card .tc-badge{position:absolute;top:4px;left:4px;font-size:.6rem;background:#1e3a5f;color:white;padding:1px 6px;border-radius:6px;opacity:.75}
+.template-card.active .tc-name{color:#1e3a5f}
+.template-card.add-new{border-style:dashed;border-color:#c0c0c0;background:#fafafa}
+.template-card.add-new:hover{border-color:#27ae60;background:#f0fff4}
+.template-card.add-new .tc-icon,.template-card.add-new .tc-name{color:#27ae60}
+.tmpl-sec-title{font-weight:bold;font-size:.88rem;color:#1e3a5f;border-bottom:1px solid #e0e8f4;padding-bottom:6px;margin:16px 0 10px}
+.template-editor{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;max-height:380px;overflow-y:auto;padding:6px;border:1px solid #eee;border-radius:8px}
+.tpl-group{grid-column:1/-1;font-size:.82rem;font-weight:bold;color:#6c5ce7;margin-top:8px;padding-bottom:4px;border-bottom:1px dashed #e0e0e0}
+.tpl-field{display:flex;align-items:center;gap:8px}
+.tpl-field label{flex:1;font-size:.78rem;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tpl-field input[type=color]{width:34px;height:28px;padding:2px;border:1.5px solid #ddd;border-radius:5px;cursor:pointer;flex-shrink:0}
+.tpl-field input[type=text],.tpl-field select{width:105px;padding:4px 6px;border:1.5px solid #ddd;border-radius:5px;font-size:.78rem;outline:none;font-family:inherit}
+.tpl-field input:focus,.tpl-field select:focus{border-color:#1e3a5f}
+.font-list{max-height:340px;overflow-y:auto;padding:2px}
+.font-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #eee;border-radius:8px;margin-bottom:8px;background:#fafafa}
+.font-row .fr-info{flex:1;min-width:0}
+.font-row .fr-name{font-weight:bold;font-size:.85rem;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.font-row .fr-preview{font-size:1.1rem;color:#555;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl}
+.font-row .fr-tag{font-size:.68rem;color:#8e44ad;background:#f5ebf8;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.font-row .fr-del{background:#e74c3c;color:white;padding:5px 12px;font-size:.78rem;border-radius:5px}
+.font-empty{text-align:center;color:#999;padding:24px;font-size:.85rem}
 #coverPage{display:none;width:100%;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:60px 40px;gap:20px;page-break-after:always}
 #coverPage h1{font-size:2.2rem;font-weight:bold}
 #coverPage p{font-size:1.1rem;opacity:.85}
 #coverPage .cover-img{max-width:300px;max-height:300px;border-radius:12px;object-fit:cover}
-
 @media print{
   header,.panel:first-child,.resizer,#selectionToolbar,.img-toolbar,.mermaid-toolbar,.panel-header,.search-panel,.fv-bar{display:none!important}
   body,html{background:white!important;margin:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
@@ -218,24 +244,22 @@ input:checked+.slider:before{transform:translateX(-20px)}
   .modal-backdrop{display:none!important}
 }
 @page{margin:15mm}
-
 #coverPage.full-image-cover{padding:0;margin:0;position:relative;overflow:hidden;align-items:stretch;justify-content:stretch}
 #coverPage.full-image-cover .cover-full-img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover}
 #coverPage.full-image-cover.fit-contain .cover-full-img{object-fit:contain;background:#111}
 #coverPage.full-image-cover .cover-full-overlay{position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.35));text-align:center;padding:40px}
 #coverPage.full-image-cover .cover-full-overlay h1{font-size:2.4rem;text-shadow:0 2px 10px rgba(0,0,0,.5)}
 #coverPage.full-image-cover .cover-full-overlay p{font-size:1.15rem;text-shadow:0 2px 8px rgba(0,0,0,.5)}
-
 .paste-target.paste-flash{border-color:#27ae60!important;background:#eafaf0!important}
-
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a5f;color:white;padding:10px 20px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.3);font-size:.85rem;opacity:0;transition:all .3s;z-index:99999;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 </style>
 </head>
 <body>
 
-<input type="file" id="fontFileInput" accept=".ttf,.woff,.woff2,.otf" style="display:none" onchange="loadUploadedFont(event)">
+<input type="file" id="fontFileInput" accept=".ttf,.woff,.woff2,.otf" multiple style="display:none" onchange="loadUploadedFont(event)">
 <input type="file" id="projectFileInput" accept=".jzv" style="display:none" onchange="loadProjectFromInput(event)">
+<input type="file" id="tplFileInput" accept=".json,application/json" style="display:none" onchange="importTemplatesJSON(event)">
 
 <div id="toast"></div>
 
@@ -244,25 +268,13 @@ input:checked+.slider:before{transform:translateX(-20px)}
   <button onclick="applyStyle('italic')" title="ایتالیک"><i>I</i></button>
   <button onclick="applyStyle('underline')" title="خط‌دار"><u>U</u></button>
   <div class="tb-sep"></div>
-  <select id="selFontFamily" onchange="applyCustomFont(this.value)">
-    <option value="">فونت...</option>
-    <option value="'Segoe UI', Tahoma, sans-serif">Segoe UI</option>
-    <option value="'Vazirmatn', sans-serif">وزیرمتن</option>
-    <option value="'Times New Roman', serif">Times New Roman</option>
-    <option value="Georgia, serif">Georgia</option>
-    <option value="Arial, sans-serif">Arial</option>
-  </select>
+  <select id="selFontFamily" onchange="applyCustomFont(this.value)"><option value="">فونت...</option></select>
   <button onclick="triggerFontUpload()" title="آپلود فونت جدید از سیستم">➕</button>
   <select id="selFontSize" onchange="applyCustomSize(this.value)">
     <option value="">اندازه...</option>
-    <option value="12px">12px</option>
-    <option value="14px">14px</option>
-    <option value="16px">16px</option>
-    <option value="18px">18px</option>
-    <option value="20px">20px</option>
-    <option value="24px">24px</option>
-    <option value="28px">28px</option>
-    <option value="32px">32px</option>
+    <option value="12px">12px</option><option value="14px">14px</option><option value="16px">16px</option>
+    <option value="18px">18px</option><option value="20px">20px</option><option value="24px">24px</option>
+    <option value="28px">28px</option><option value="32px">32px</option>
   </select>
   <div class="tb-sep"></div>
   <label style="display:flex;align-items:center;gap:4px;color:white;font-size:.75rem;padding:0 4px;" onmousedown="saveColorSelection()">
@@ -280,26 +292,18 @@ input:checked+.slider:before{transform:translateX(-20px)}
 <div id="imgModal" class="modal-backdrop">
   <div class="modal-box">
     <h3>🖼 درج تصویر</h3>
-    <div class="msec">
-      <label>آپلود از دستگاه:</label>
+    <div class="msec"><label>آپلود از دستگاه:</label>
       <div class="drop-zone paste-target" id="dropZone" tabindex="0">
         <div>📂 رها کنید، کلیک کنید، یا Ctrl+V برای پیست</div>
         <input type="file" id="imgFileInput" accept="image/*">
       </div>
       <img id="imgPreview" class="modal-preview" alt="">
     </div>
-    <div class="msec">
-      <label>یا آدرس URL:</label>
-      <input type="text" id="imgUrlInput" placeholder="https://example.com/image.jpg">
-    </div>
+    <div class="msec"><label>یا آدرس URL:</label><input type="text" id="imgUrlInput" placeholder="https://example.com/image.jpg"></div>
     <div class="mrow">
       <div class="msec"><label>عرض (px):</label><input type="text" id="imgWidthInput" placeholder="300"></div>
       <div class="msec"><label>تراز:</label>
-        <select id="imgAlignInput">
-          <option value="right">راست</option>
-          <option value="center">وسط</option>
-          <option value="left">چپ</option>
-        </select>
+        <select id="imgAlignInput"><option value="right">راست</option><option value="center">وسط</option><option value="left">چپ</option></select>
       </div>
     </div>
     <div class="modal-btns">
@@ -309,16 +313,11 @@ input:checked+.slider:before{transform:translateX(-20px)}
   </div>
 </div>
 
-<!-- 🆕 مودال ویرایش Mermaid -->
 <div id="mermaidEditModal" class="modal-backdrop">
   <div class="modal-box" style="width:640px">
     <h3>✏️ ویرایش کد Mermaid</h3>
-    <div class="msec">
-      <label>کد نمودار را ویرایش کنید:</label>
+    <div class="msec"><label>کد نمودار را ویرایش کنید:</label>
       <textarea id="mermaidEditCode" spellcheck="false" style="width:100%;min-height:280px;padding:12px;font-family:'Courier New',monospace;font-size:.85rem;border:1.5px solid #ddd;border-radius:8px;outline:none;direction:ltr;text-align:left;resize:vertical;line-height:1.6"></textarea>
-    </div>
-    <div style="background:#eef4fb;border:1px solid #bce0fd;border-radius:8px;padding:10px 12px;font-size:.78rem;color:#1e3a5f;line-height:1.7">
-      💡 پس از ذخیره، نمودار با تنظیمات عرض قبلی دوباره رندر می‌شود.
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('mermaidEditModal')">انصراف</button>
@@ -330,7 +329,6 @@ input:checked+.slider:before{transform:translateX(-20px)}
 <div id="pdfModal" class="modal-backdrop">
   <div class="modal-box">
     <h3>⚙️ تنظیمات PDF</h3>
-
     <div class="pdf-sec-title">📄 صفحه کاور</div>
     <div class="toggle-row">
       <label class="lbl" for="coverToggle">اضافه کردن صفحه کاور</label>
@@ -339,53 +337,34 @@ input:checked+.slider:before{transform:translateX(-20px)}
     <div class="sub-fields" id="coverFields">
       <div class="msec"><label>عنوان:</label><input type="text" id="coverTitle" placeholder="عنوان جزوه"></div>
       <div class="msec"><label>زیرعنوان / نام:</label><input type="text" id="coverSubtitle" placeholder="نام استاد — ترم"></div>
-
-      <div class="msec" id="coverBgFieldsWrap">
-        <label>رنگ پس‌زمینه:</label>
-        <div class="color-row">
-          <input type="color" id="coverBgC" value="#1e3a5f" oninput="syncColorPick(this,'coverBgT')">
-          <input type="text"  id="coverBgT" value="#1e3a5f" oninput="syncColorText(this,'coverBgC')">
-        </div>
+      <div class="msec" id="coverBgFieldsWrap"><label>رنگ پس‌زمینه:</label>
+        <div class="color-row"><input type="color" id="coverBgC" value="#1e3a5f" oninput="syncColorPick(this,'coverBgT')"><input type="text" id="coverBgT" value="#1e3a5f" oninput="syncColorText(this,'coverBgC')"></div>
       </div>
-      <div class="msec" id="coverFgFieldsWrap">
-        <label>رنگ متن:</label>
-        <div class="color-row">
-          <input type="color" id="coverFgC" value="#ffffff" oninput="syncColorPick(this,'coverFgT')">
-          <input type="text"  id="coverFgT" value="#ffffff" oninput="syncColorText(this,'coverFgC')">
-        </div>
+      <div class="msec" id="coverFgFieldsWrap"><label>رنگ متن:</label>
+        <div class="color-row"><input type="color" id="coverFgC" value="#ffffff" oninput="syncColorPick(this,'coverFgT')"><input type="text" id="coverFgT" value="#ffffff" oninput="syncColorText(this,'coverFgC')"></div>
       </div>
-
-      <div class="msec">
-        <label>تصویر کاور (اختیاری):</label>
+      <div class="msec"><label>تصویر کاور (اختیاری):</label>
         <div class="drop-zone paste-target" id="coverDropZone" tabindex="0">
-          <div id="coverDropZoneText">📂 آپلود از دستگاه، یا کلیک کرده و Ctrl+V بزنید برای پیست عکس</div>
+          <div>📂 آپلود از دستگاه، یا کلیک کرده و Ctrl+V بزنید برای پیست عکس</div>
           <input type="file" id="coverImgFileInput" accept="image/*">
         </div>
         <img id="coverImgPreview" class="modal-preview" alt="" style="max-height:140px">
         <button type="button" class="remove-cover-img" id="removeCoverImgBtn" style="display:none" onclick="clearCoverImg()">✕ حذف تصویر</button>
         <div style="margin-top:8px"><label style="margin-bottom:4px">یا آدرس URL:</label><input type="text" id="coverImgUrlInput" placeholder="https://..."></div>
       </div>
-
       <div class="toggle-row" id="coverFitRow" style="display:none">
-        <label class="lbl" for="coverFitPage">عکس تمام صفحه شود (Fit Page)
-          <span class="lbl-hint">کل صفحه‌ی کاور را همین عکس می‌پوشاند</span>
-        </label>
+        <label class="lbl" for="coverFitPage">عکس تمام صفحه شود (Fit Page)</label>
         <label class="switch"><input type="checkbox" id="coverFitPage" onchange="toggleCoverFit()"><span class="slider"></span></label>
       </div>
-
       <div id="coverFitCropRow" class="msec" style="display:none">
         <label>نحوه‌ی پر کردن صفحه:</label>
-        <select id="coverFullFit">
-          <option value="cover">پوشش کامل (Crop در صورت نیاز)</option>
-          <option value="contain">کل عکس دیده شود (بدون برش)</option>
-        </select>
+        <select id="coverFullFit"><option value="cover">پوشش کامل (Crop در صورت نیاز)</option><option value="contain">کل عکس دیده شود (بدون برش)</option></select>
       </div>
       <div class="toggle-row" id="coverOverlayToggleRow" style="display:none;margin-bottom:0">
         <label class="lbl" for="coverFullOverlayText">نوشتن عنوان روی عکس</label>
         <label class="switch"><input type="checkbox" id="coverFullOverlayText"><span class="slider"></span></label>
       </div>
     </div>
-
     <div class="pdf-sec-title">🔢 شماره صفحه</div>
     <div class="toggle-row">
       <label class="lbl" for="pnToggle">اضافه کردن شماره صفحه</label>
@@ -393,68 +372,67 @@ input:checked+.slider:before{transform:translateX(-20px)}
     </div>
     <div class="sub-fields" id="pnFields">
       <div class="msec"><label>موقعیت:</label>
-        <select id="pnPos">
-          <option value="center">پایین — وسط</option>
-          <option value="right">پایین — راست</option>
-          <option value="left">پایین — چپ</option>
-        </select>
+        <select id="pnPos"><option value="center">پایین — وسط</option><option value="right">پایین — راست</option><option value="left">پایین — چپ</option></select>
       </div>
       <div class="mrow">
         <div class="msec"><label>فونت:</label>
-          <select id="pnFont">
-            <option value="'Segoe UI',Tahoma,sans-serif">پیش‌فرض (Segoe UI)</option>
-            <option value="'Vazirmatn','Segoe UI',Tahoma,sans-serif">وزیرمتن</option>
-            <option value="'Times New Roman',serif">Times New Roman</option>
-            <option value="Georgia,serif">Georgia</option>
-            <option value="'Courier New',monospace">Courier New</option>
-            <option value="Arial,sans-serif">Arial</option>
-          </select>
+          <select id="pnFont"><option value="'Segoe UI',Tahoma,sans-serif">پیش‌فرض (Segoe UI)</option></select>
         </div>
         <div class="msec"><label>اندازه فونت (pt):</label>
-          <div class="range-row">
-            <input type="range" id="pnSize" min="7" max="18" value="10" oninput="document.getElementById('pnSizeVal').textContent=this.value+'pt'">
-            <span class="rv" id="pnSizeVal">10pt</span>
-          </div>
-        </div>
-      </div>
-      <div class="mrow">
-        <div class="msec">
-          <div class="inline-toggle">
-            <label class="switch"><input type="checkbox" id="pnItalic"><span class="slider"></span></label>
-            <span>ایتالیک</span>
-          </div>
-        </div>
-        <div class="msec">
-          <div class="inline-toggle">
-            <label class="switch"><input type="checkbox" id="pnBold"><span class="slider"></span></label>
-            <span>بولد</span>
-          </div>
+          <div class="range-row"><input type="range" id="pnSize" min="7" max="18" value="10" oninput="document.getElementById('pnSizeVal').textContent=this.value+'pt'"><span class="rv" id="pnSizeVal">10pt</span></div>
         </div>
       </div>
       <div class="msec"><label>رنگ شماره صفحه:</label>
-        <div class="color-row">
-          <input type="color" id="pnColorC" value="#666666" oninput="syncColorPick(this,'pnColorT')">
-          <input type="text"  id="pnColorT" value="#666666" oninput="syncColorText(this,'pnColorC')">
-        </div>
+        <div class="color-row"><input type="color" id="pnColorC" value="#666666" oninput="syncColorPick(this,'pnColorT')"><input type="text" id="pnColorT" value="#666666" oninput="syncColorText(this,'pnColorC')"></div>
       </div>
       <div class="msec"><label>فاصله از لبه پایین صفحه (mm):</label>
-        <div class="range-row">
-          <input type="range" id="pnMargin" min="0" max="25" value="8" oninput="document.getElementById('pnMarginVal').textContent=this.value+'mm'">
-          <span class="rv" id="pnMarginVal">8mm</span>
-        </div>
+        <div class="range-row"><input type="range" id="pnMargin" min="0" max="25" value="8" oninput="document.getElementById('pnMarginVal').textContent=this.value+'mm'"><span class="rv" id="pnMarginVal">8mm</span></div>
       </div>
       <div class="toggle-row" style="margin-bottom:0">
         <label class="lbl" for="pnSkipCover">صفحه کاور شماره نخورد</label>
         <label class="switch"><input type="checkbox" id="pnSkipCover" checked><span class="slider"></span></label>
       </div>
-      <div style="background:#fff7e6;border:1px solid #f3d9a4;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:.78rem;color:#7a5b1e;line-height:1.7">
-        ⚠️ در پنجره‌ی چاپ Chrome، Margins را روی <b>None</b> بگذارید.
-      </div>
     </div>
-
     <div class="modal-btns" style="margin-top:22px">
       <button class="btn-cancel" onclick="closeModal('pdfModal')">انصراف</button>
       <button class="btn-confirm" onclick="doPrint()">🖨 چاپ / PDF</button>
+    </div>
+  </div>
+</div>
+
+<div id="templateModal" class="modal-backdrop">
+  <div class="modal-box" style="width:880px">
+    <h3>🎨 تمپلیت ظاهری (Theme)</h3>
+    <div class="tmpl-sec-title">تمپلیت‌ها — روی هرکدام کلیک کنید تا اعمال شود</div>
+    <div id="templateGrid" class="template-grid"></div>
+    <div class="tmpl-sec-title">ویرایش جزئیات — تغییرات زنده اعمال می‌شوند</div>
+    <div id="templateEditor" class="template-editor"></div>
+    <div class="modal-btns" style="margin-top:22px;flex-wrap:wrap;justify-content:flex-start;gap:8px">
+      <button class="btn-cancel" onclick="closeModal('templateModal')">بستن</button>
+      <button id="deleteTplBtn" style="background:#e74c3c;color:white" onclick="deleteCurrentTemplate()">🗑 حذف</button>
+      <button style="background:#e67e22;color:white" onclick="openFontModal()">🔤 مدیریت فونت‌ها</button>
+      <button style="background:#8e44ad;color:white" onclick="exportTemplatesJSON()">⬇ خروجی تمپلیت‌ها</button>
+      <button style="background:#8e44ad;color:white" onclick="document.getElementById('tplFileInput').click()">📂 بارگذاری تمپلیت</button>
+      <button class="btn-confirm" style="margin-right:auto" onclick="applyCurrentLiveTemplate()">✅ اعمال و ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<div id="fontModal" class="modal-backdrop">
+  <div class="modal-box" style="width:640px">
+    <h3>🔤 مدیریت فونت‌ها</h3>
+    <div class="tmpl-sec-title">افزودن فونت از کامپیوتر</div>
+    <div class="drop-zone paste-target" id="fontDropZone">
+      <div>📂 فایل‌های فونت (.ttf / .woff / .woff2 / .otf) را اینجا رها کنید یا کلیک کنید</div>
+      <input type="file" id="fontBulkFileInput" accept=".ttf,.woff,.woff2,.otf" multiple>
+    </div>
+    <div style="background:#eef4fb;border:1px solid #bce0fd;border-radius:8px;padding:10px 12px;font-size:.78rem;color:#1e3a5f;line-height:1.7;margin-top:10px">
+      💡 فونت‌ها فقط در همین مرورگر (IndexedDB) ذخیره می‌شوند و بعد از بستن و باز کردن دوباره هم در دسترس هستند. اگر می‌خواهید با شخص دیگری به اشتراک بگذارید، فایل فونت را جداگانه بفرستید.
+    </div>
+    <div class="tmpl-sec-title">فونت‌های ذخیره‌شده (<span id="fontCount">0</span>)</div>
+    <div id="fontList" class="font-list"></div>
+    <div class="modal-btns" style="margin-top:22px">
+      <button class="btn-cancel" onclick="closeModal('fontModal')">بستن</button>
     </div>
   </div>
 </div>
@@ -467,10 +445,10 @@ input:checked+.slider:before{transform:translateX(-20px)}
     <button onclick="exportProject()" style="background:#e67e22; color:white;">💾 خروجی پروژه (.jzv)</button>
     <button onclick="triggerProjectUpload()" style="background:#d35400; color:white;">📂 بارگذاری پروژه</button>
     <div class="separator"></div>
-    <button class="btn-pdf"  onclick="openModal('pdfModal')">⬇ PDF</button>
+    <button class="btn-pdf" onclick="openModal('pdfModal')">⬇ PDF</button>
     <button class="btn-word" onclick="exportWord()">⬇ Word</button>
     <div class="separator"></div>
-    <button class="btn-img"  onclick="openImgModal()">🖼 درج عکس</button>
+    <button class="btn-img" onclick="openImgModal()">🖼 درج عکس</button>
     <div class="separator"></div>
     <button class="btn-align" id="gbtnR" onclick="setGlobalAlign('right')">≡ راست</button>
     <button class="btn-align" id="gbtnC" onclick="setGlobalAlign('center')">≡ وسط</button>
@@ -479,12 +457,15 @@ input:checked+.slider:before{transform:translateX(-20px)}
     <button class="btn-dir" onclick="setDir('rtl')">RTL</button>
     <button class="btn-dir" onclick="setDir('ltr')">LTR</button>
     <div class="separator"></div>
+    <button class="btn-theme" onclick="openTemplateModal()">🎨 تمپلیت</button>
+    <button class="btn-fonts" onclick="openFontModal()">🔤 فونت‌ها</button>
+    <div class="separator"></div>
     <button class="btn-fullview" id="btnMdFullview" onclick="toggleMarkdownFullview()">🖥 فول‌ویو ورودی</button>
     <button class="btn-fullview" id="btnPreviewFullview" onclick="togglePreviewFullview()">👁 فول‌ویو پیش‌نمایش</button>
     <button class="btn-sync" id="btnSyncScroll" onclick="toggleScrollSync()">🔗 هم‌گام اسکرول</button>
     <div class="separator"></div>
-    <button class="btn-undo-redo" id="btnUndo" onclick="undo()">↩️ عقب</button>
-    <button class="btn-undo-redo" id="btnRedo" onclick="redo()">↪️ جلو</button>
+    <button class="btn-undo-redo" onclick="undo()">↩️ عقب</button>
+    <button class="btn-undo-redo" onclick="redo()">↪️ جلو</button>
     <button class="btn-align" onclick="syncMarkdownAndPreview()" style="background:#f39c12;padding:6px 10px;">🔄 همگام‌سازی</button>
     <div class="separator"></div>
     <button class="btn-clear" onclick="clearAll()">🗑 پاک</button>
@@ -492,153 +473,100 @@ input:checked+.slider:before{transform:translateX(-20px)}
 </header>
 
 <div class="container" id="mainContainer">
-
   <div class="panel" id="leftPanel">
     <div class="panel-header">✏️ ورودی Markdown</div>
-
     <div class="fv-bar md-fv-bar">
-      <button onclick="undo()">↩️ عقب</button>
-      <button onclick="redo()">↪️ جلو</button>
+      <button onclick="undo()">↩️ عقب</button><button onclick="redo()">↪️ جلو</button>
       <div class="tb-sep"></div>
-      <button onclick="exportProject()">💾 ذخیره پروژه</button>
-      <button onclick="triggerProjectUpload()">📂 بارگذاری</button>
+      <button onclick="exportProject()">💾 ذخیره</button><button onclick="triggerProjectUpload()">📂 بارگذاری</button>
       <div class="tb-sep"></div>
-      <button onclick="openModal('pdfModal')">⬇ PDF</button>
-      <button onclick="exportWord()">⬇ Word</button>
+      <button onclick="openModal('pdfModal')">⬇ PDF</button><button onclick="exportWord()">⬇ Word</button>
       <div class="tb-sep"></div>
-      <button onclick="setGlobalAlign('right')">≡ راست</button>
-      <button onclick="setGlobalAlign('center')">≡ وسط</button>
-      <button onclick="setGlobalAlign('left')">≡ چپ</button>
+      <button onclick="setGlobalAlign('right')">≡ راست</button><button onclick="setGlobalAlign('center')">≡ وسط</button><button onclick="setGlobalAlign('left')">≡ چپ</button>
       <div class="tb-sep"></div>
-      <button onclick="setDir('rtl')">RTL</button>
-      <button onclick="setDir('ltr')">LTR</button>
+      <button onclick="setDir('rtl')">RTL</button><button onclick="setDir('ltr')">LTR</button>
       <div class="tb-sep"></div>
       <button onclick="openImgModal()">🖼 عکس</button>
+      <button onclick="openTemplateModal()">🎨 تمپلیت</button>
+      <button onclick="openFontModal()">🔤 فونت</button>
       <button onclick="toggleSearchPanel()">🔍 ویرایش</button>
-      <button onclick="syncMarkdownAndPreview()">🔄 همگام</button>
       <button onclick="clearAll()">🗑 پاک</button>
       <div class="tb-sep"></div>
       <button onclick="togglePreviewFullview()">👁 پیش‌نمایش</button>
-      <button class="accent" onclick="toggleMarkdownFullview()">✕ خروج از فول‌ویو</button>
-      <span class="fv-badge">🖥 حالت فول‌ویو ورودی — Esc برای خروج</span>
+      <button class="accent" onclick="toggleMarkdownFullview()">✕ خروج</button>
+      <span class="fv-badge">🖥 فول‌ویو — Esc برای خروج</span>
     </div>
-
     <textarea id="mdInput" placeholder="متن Markdown را اینجا paste کنید..."></textarea>
   </div>
-
   <div class="resizer" id="resizer"></div>
-
   <div class="panel" id="rightPanel">
     <div class="panel-header">
       👁 پیش‌نمایش
-      <button onclick="selectAllPreview()" style="background:#16a085; color:white; font-size:.78rem; padding:4px 10px; border-radius:5px; margin-right: auto;" title="انتخاب کل متن پیش‌نمایش">☑ انتخاب همه</button>
-      <button onclick="toggleSearchPanel()" style="background:#2c3e50; color:white; font-size:.78rem; padding:4px 10px; border-radius:5px;">🔍 ابزار ویرایش</button>
-      <span style="font-size:.75rem;color:#999;font-weight:normal;margin-right:10px">💡 برای تراز انفرادی، متن را انتخاب کنید</span>
+      <button onclick="selectAllPreview()" style="background:#16a085;color:white;font-size:.78rem;padding:4px 10px;border-radius:5px;margin-right:auto;">☑ انتخاب همه</button>
+      <button onclick="toggleSearchPanel()" style="background:#2c3e50;color:white;font-size:.78rem;padding:4px 10px;border-radius:5px;">🔍 ابزار ویرایش</button>
     </div>
-
     <div class="fv-bar preview-fv-bar">
-      <button onclick="undo()">↩️ عقب</button>
-      <button onclick="redo()">↪️ جلو</button>
+      <button onclick="undo()">↩️</button><button onclick="redo()">↪️</button>
       <div class="tb-sep"></div>
-      <button onclick="exportProject()">💾 ذخیره پروژه</button>
-      <button onclick="triggerProjectUpload()">📂 بارگذاری</button>
+      <button onclick="exportProject()">💾 ذخیره</button><button onclick="triggerProjectUpload()">📂 بارگذاری</button>
       <div class="tb-sep"></div>
-      <button onclick="openModal('pdfModal')">⬇ PDF</button>
-      <button onclick="exportWord()">⬇ Word</button>
+      <button onclick="openModal('pdfModal')">⬇ PDF</button><button onclick="exportWord()">⬇ Word</button>
       <div class="tb-sep"></div>
-      <button onclick="selectAllPreview()">☑ انتخاب همه</button>
-      <button onclick="setGlobalAlign('right')">≡ راست</button>
-      <button onclick="setGlobalAlign('center')">≡ وسط</button>
-      <button onclick="setGlobalAlign('left')">≡ چپ</button>
+      <button onclick="selectAllPreview()">☑ همه</button>
+      <button onclick="setGlobalAlign('right')">≡ راست</button><button onclick="setGlobalAlign('center')">≡ وسط</button><button onclick="setGlobalAlign('left')">≡ چپ</button>
       <div class="tb-sep"></div>
-      <button onclick="setDir('rtl')">RTL</button>
-      <button onclick="setDir('ltr')">LTR</button>
+      <button onclick="setDir('rtl')">RTL</button><button onclick="setDir('ltr')">LTR</button>
       <div class="tb-sep"></div>
       <button onclick="openImgModal()">🖼 عکس</button>
+      <button onclick="openTemplateModal()">🎨 تمپلیت</button>
+      <button onclick="openFontModal()">🔤 فونت</button>
       <button onclick="toggleSearchPanel()">🔍 ویرایش</button>
-      <button onclick="syncMarkdownAndPreview()">🔄 همگام</button>
       <button onclick="clearAll()">🗑 پاک</button>
       <div class="tb-sep"></div>
       <button onclick="toggleMarkdownFullview()">🖥 ورودی</button>
-      <button class="accent" onclick="togglePreviewFullview()">✕ خروج از فول‌ویو</button>
-      <span class="fv-badge">👁 حالت فول‌ویو پیش‌نمایش — Esc برای خروج</span>
+      <button class="accent" onclick="togglePreviewFullview()">✕ خروج</button>
+      <span class="fv-badge">👁 فول‌ویو — Esc</span>
     </div>
-
     <div class="search-panel" id="searchPanel">
       <div class="search-grid">
-        <div class="search-field">
-          <label>کلمه مورد نظر جهت جستجو:</label>
-          <input type="text" id="findInput" placeholder="مثال: نکته">
+        <div class="search-field"><label>کلمه:</label><input type="text" id="findInput" placeholder="مثال: نکته"></div>
+        <div class="search-field"><label>جایگزینی:</label><input type="text" id="replaceInput" placeholder="مثال: توجه"></div>
+        <div class="search-field"><label>فونت:</label>
+          <select id="findFont"><option value="">پیش‌فرض</option></select>
         </div>
-        <div class="search-field">
-          <label>جایگزینی با کلمه جدید (اختیاری):</label>
-          <input type="text" id="replaceInput" placeholder="مثال: توجه">
-        </div>
-        <div class="search-field">
-          <label>تغییر فونت:</label>
-          <select id="findFont">
-            <option value="">پیش‌فرض</option>
-            <option value="'Segoe UI', Tahoma, sans-serif">Segoe UI</option>
-            <option value="'Vazirmatn', sans-serif">وزیرمتن</option>
-            <option value="'Times New Roman', serif">Times New Roman</option>
-            <option value="Georgia, serif">Georgia</option>
-          </select>
-        </div>
-        <div class="search-field">
-          <label>اندازه فونت:</label>
-          <input type="text" id="findSize" placeholder="مثال: 18px یا 1.2rem">
-        </div>
-        <div class="search-field">
-          <label>رنگ آمیزی:</label>
-          <div style="display:flex; gap:6px;">
-            <input type="color" id="findColor" value="#e74c3c" style="width:30px; height:32px; border:1px solid #ccc; cursor:pointer;">
-            <input type="text" id="findColorHex" value="#e74c3c" style="width:80px; font-size:0.75rem;" oninput="document.getElementById('findColor').value=this.value">
+        <div class="search-field"><label>اندازه:</label><input type="text" id="findSize" placeholder="18px یا 1.2rem"></div>
+        <div class="search-field"><label>رنگ:</label>
+          <div style="display:flex;gap:6px;">
+            <input type="color" id="findColor" value="#e74c3c" style="width:30px;height:32px;border:1px solid #ccc;cursor:pointer;">
+            <input type="text" id="findColorHex" value="#e74c3c" style="width:80px;font-size:0.75rem;" oninput="document.getElementById('findColor').value=this.value">
           </div>
         </div>
       </div>
-      
       <div class="search-format-row">
-        <label class="search-checkbox"><input type="checkbox" id="findBold"> <b>B</b> ضخیم</label>
-        <label class="search-checkbox"><input type="checkbox" id="findItalic"> <i>I</i> کج</label>
-        <label class="search-checkbox"><input type="checkbox" id="findUnderline"> <u>U</u> خط‌دار</label>
-        <div class="separator" style="background:#ddd; height:20px;"></div>
-        <div class="search-field" style="flex-direction:row; align-items:center; gap:6px;">
-          <label style="margin:0;">تراز بلاک:</label>
-          <select id="findAlign" style="padding:3px 6px;">
-            <option value="">بدون تغییر</option>
-            <option value="right">راست‌چین</option>
-            <option value="center">وسط‌چین</option>
-            <option value="left">چپ‌چین</option>
-          </select>
+        <label class="search-checkbox"><input type="checkbox" id="findBold"> <b>B</b></label>
+        <label class="search-checkbox"><input type="checkbox" id="findItalic"> <i>I</i></label>
+        <label class="search-checkbox"><input type="checkbox" id="findUnderline"> <u>U</u></label>
+        <div class="separator" style="background:#ddd;height:20px;"></div>
+        <div class="search-field" style="flex-direction:row;align-items:center;gap:6px;">
+          <label style="margin:0;">تراز:</label>
+          <select id="findAlign" style="padding:3px 6px;"><option value="">بدون تغییر</option><option value="right">راست</option><option value="center">وسط</option><option value="left">چپ</option></select>
         </div>
-        <div class="search-field" style="flex-direction:row; align-items:center; gap:6px;">
-          <label style="margin:0;">جهت متن:</label>
-          <select id="findDir" style="padding:3px 6px;">
-            <option value="">بدون تغییر</option>
-            <option value="rtl">RTL</option>
-            <option value="ltr">LTR</option>
-          </select>
+        <div class="search-field" style="flex-direction:row;align-items:center;gap:6px;">
+          <label style="margin:0;">جهت:</label>
+          <select id="findDir" style="padding:3px 6px;"><option value="">بدون تغییر</option><option value="rtl">RTL</option><option value="ltr">LTR</option></select>
         </div>
-        <button onclick="applyStyleToSearchMatches()" style="background:#27ae60; color:white; padding:6px 14px; margin-right:auto; font-weight:bold;">✅ اعمال تغییرات</button>
+        <button onclick="applyStyleToSearchMatches()" style="background:#27ae60;color:white;padding:6px 14px;margin-right:auto;font-weight:bold;">✅ اعمال</button>
       </div>
     </div>
-
     <div id="preview" contenteditable="true" spellcheck="false"></div>
   </div>
 </div>
 
 <script>
-/* =========================================================
-   پیکربندی اولیه
-========================================================= */
 mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
 
-/* =========================================================
-   Extension رسمی KaTeX برای marked
-========================================================= */
 const mathExt = {
-  name: 'math',
-  level: 'inline',
+  name: 'math', level: 'inline',
   start(src){ const i = src.search(/\$|\\\(|\\\[/); return i < 0 ? undefined : i; },
   tokenizer(src){
     let m;
@@ -648,31 +576,21 @@ const mathExt = {
     if((m = src.match(/^\\\(([\s\S]+?)\\\)/))) return {type:'math', raw:m[0], text:m[1], display:false};
   },
   renderer(token){
-    try {
-      return katex.renderToString(token.text, { displayMode: token.display, throwOnError: false, strict: false, errorColor: '#cc0000' });
-    } catch(e){ return token.raw; }
+    try { return katex.renderToString(token.text, { displayMode: token.display, throwOnError: false, strict: false, errorColor: '#cc0000' }); }
+    catch(e){ return token.raw; }
   }
 };
 marked.use({ breaks: true, gfm: true, extensions: [mathExt] });
 
 const input=document.getElementById('mdInput'),preview=document.getElementById('preview');
 
-/* =========================================================
-   🔥 محافظت از Mermaid: snapshot/restore
-========================================================= */
+/* ============ Mermaid protection ============ */
 function snapshotMermaids(){
   const snaps = [];
   preview.querySelectorAll('.mermaid-wrapper').forEach(w => {
-    const m = w.querySelector('.mermaid');
-    if(!m) return;
+    const m = w.querySelector('.mermaid'); if(!m) return;
     const svg = m.querySelector('svg');
-    snaps.push({
-      mermaid: m,
-      hasSVG: !!svg,
-      svgChildrenCount: svg ? svg.children.length : 0,
-      svgStyle: svg ? (svg.getAttribute('style') || '') : '',
-      svgHTML: svg ? svg.outerHTML : ''
-    });
+    snaps.push({ mermaid: m, hasSVG: !!svg, svgStyle: svg ? (svg.getAttribute('style') || '') : '' });
   });
   return snaps;
 }
@@ -684,50 +602,23 @@ function restoreMermaidsIfBroken(snaps){
     if(!m || !m.isConnected) return;
     const svg = m.querySelector('svg');
     const broken = s.hasSVG && (!svg || svg.children.length === 0);
-    if(broken){
-      const code = m.getAttribute('data-original-code');
-      if(code){
-        m.innerHTML = '';
-        m.textContent = code;
-        m.removeAttribute('data-processed');
-        toRender.push(m);
-      }
-    } else if(svg && s.svgStyle && svg.getAttribute('style') !== s.svgStyle){
-      svg.setAttribute('style', s.svgStyle);
-    }
+    if(broken){ const code = m.getAttribute('data-original-code'); if(code){ m.innerHTML=''; m.textContent=code; m.removeAttribute('data-processed'); toRender.push(m); } }
+    else if(svg && s.svgStyle && svg.getAttribute('style') !== s.svgStyle){ svg.setAttribute('style', s.svgStyle); }
   });
-  if(toRender.length){
-    mermaid.run({ nodes: toRender }).catch(e => console.error('خطا در بازیابی Mermaid:', e));
-  }
+  if(toRender.length) mermaid.run({ nodes: toRender }).catch(e => console.error(e));
 }
-/**
- * اجرای ایمن یک عملیات استایل که به Mermaidها آسیب نزند
- */
-function safeStyleOp(fn){
-  const snaps = snapshotMermaids();
-  try { fn(); } catch(e){ console.error(e); }
-  restoreMermaidsIfBroken(snaps);
-}
+function safeStyleOp(fn){ const snaps = snapshotMermaids(); try { fn(); } catch(e){ console.error(e); } restoreMermaidsIfBroken(snaps); }
 
-/* =========================================================
-   توست
-========================================================= */
+/* ============ Toast ============ */
 let toastTimer=null;
 function showToast(msg){
   const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),1800);
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-/* =========================================================
-   تاریخچه
-========================================================= */
-const historyStack = [];
-let historyIndex = -1;
-const maxHistory = 50;
-
+/* ============ History ============ */
+const historyStack = []; let historyIndex = -1; const maxHistory = 50;
 function saveState() {
   const currentState = { md: input.value, preview: preview.innerHTML };
   if (historyIndex < historyStack.length - 1) historyStack.splice(historyIndex + 1);
@@ -738,7 +629,6 @@ function saveState() {
 function undo() { if (historyIndex > 0) { historyIndex--; loadHistoryState(historyStack[historyIndex]); } }
 function redo() { if (historyIndex < historyStack.length - 1) { historyIndex++; loadHistoryState(historyStack[historyIndex]); } }
 function loadHistoryState(state) { input.value = state.md; preview.innerHTML = state.preview; }
-
 document.addEventListener('keydown', e => {
   if (e.ctrlKey && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
   if (e.ctrlKey && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); }
@@ -749,207 +639,111 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* =========================================================
-   Mermaid processing
-========================================================= */
+/* ============ Mermaid processing ============ */
 async function processMermaidDiagrams() {
   const blocks = preview.querySelectorAll('pre code.language-mermaid');
   for (let i = 0; i < blocks.length; i++) {
-    const block = blocks[i];
-    const code = block.textContent;
-    const parent = block.parentElement;
+    const block = blocks[i]; const code = block.textContent; const parent = block.parentElement;
     const wrapper = document.createElement('div');
-    wrapper.className = 'mermaid-wrapper';
-    // 🔥 محافظت: جلوگیری از دسترسی ویرایشگر به داخل SVG
-    wrapper.setAttribute('contenteditable', 'false');
-    const toolbar = document.createElement('div');
-    toolbar.className = 'mermaid-toolbar';
+    wrapper.className = 'mermaid-wrapper'; wrapper.setAttribute('contenteditable', 'false');
+    const toolbar = document.createElement('div'); toolbar.className = 'mermaid-toolbar';
     toolbar.innerHTML = `
       <label>عرض: <input type="range" class="mm-slider" min="150" max="1400" value="800" oninput="resizeMermaid(this)"></label>
       <label><input type="number" class="mm-pct" min="10" max="200" value="100" oninput="resizeMermaidPct(this)">%</label>
       <div class="tb-sep"></div>
-      <button onclick="fitMermaid(this, 'container')">↔ کل عرض</button>
-      <button onclick="fitMermaid(this, 'auto')">↺ ریست</button>
+      <button onclick="fitMermaid(this, 'container')">↔ کل عرض</button><button onclick="fitMermaid(this, 'auto')">↺ ریست</button>
       <div class="tb-sep"></div>
-      <button onclick="zoomMermaid(this, 1.1)">➕</button>
-      <button onclick="zoomMermaid(this, 0.9)">➖</button>
+      <button onclick="zoomMermaid(this, 1.1)">➕</button><button onclick="zoomMermaid(this, 0.9)">➖</button>
       <div class="tb-sep"></div>
-      <button class="edit" onclick="editMermaid(this)">✏️ ویرایش</button>
-    `;
-    const div = document.createElement('div');
-    div.className = 'mermaid';
-    div.setAttribute('data-original-code', code);
-    div.textContent = code;
-    wrapper.appendChild(toolbar);
-    wrapper.appendChild(div);
+      <button class="edit" onclick="editMermaid(this)">✏️ ویرایش</button>`;
+    const div = document.createElement('div'); div.className = 'mermaid';
+    div.setAttribute('data-original-code', code); div.textContent = code;
+    wrapper.appendChild(toolbar); wrapper.appendChild(div);
     parent.parentNode.replaceChild(wrapper, parent);
   }
-  try {
-    if (preview.querySelectorAll('.mermaid').length > 0) {
-      await mermaid.run({ nodes: preview.querySelectorAll('.mermaid') });
-    }
-  } catch (err) { console.error("خطا در پردازش نمودار:", err); }
+  try { if (preview.querySelectorAll('.mermaid').length > 0) await mermaid.run({ nodes: preview.querySelectorAll('.mermaid') }); }
+  catch (err) { console.error("خطا:", err); }
 }
-
-/* =========================================================
-   🆕 ویرایش Mermaid
-========================================================= */
 let editingMermaidWrapper = null;
-
 function editMermaid(btn){
-  const wrapper = btn.closest('.mermaid-wrapper');
-  const m = wrapper.querySelector('.mermaid');
-  if(!m) return;
-  const code = m.getAttribute('data-original-code') || m.textContent;
+  const wrapper = btn.closest('.mermaid-wrapper'); const m = wrapper.querySelector('.mermaid'); if(!m) return;
   editingMermaidWrapper = wrapper;
-  const ta = document.getElementById('mermaidEditCode');
-  ta.value = code;
+  document.getElementById('mermaidEditCode').value = m.getAttribute('data-original-code') || m.textContent;
   openModal('mermaidEditModal');
-  setTimeout(() => { ta.focus(); ta.setSelectionRange(0, 0); }, 100);
 }
-
 async function saveMermaidEdit(){
   if(!editingMermaidWrapper){ closeModal('mermaidEditModal'); return; }
   const wrapper = editingMermaidWrapper;
   const newCode = document.getElementById('mermaidEditCode').value;
-  const m = wrapper.querySelector('.mermaid');
-  if(!m){ closeModal('mermaidEditModal'); return; }
-
-  // ذخیره عرض فعلی
+  const m = wrapper.querySelector('.mermaid'); if(!m){ closeModal('mermaidEditModal'); return; }
   const oldSvg = m.querySelector('svg');
-  const savedMaxWidth = oldSvg ? oldSvg.style.maxWidth : '';
-  const savedWidth = oldSvg ? oldSvg.style.width : '';
-
-  m.setAttribute('data-original-code', newCode);
-  m.innerHTML = '';
-  m.textContent = newCode;
-  m.removeAttribute('data-processed');
-
+  const savedMaxWidth = oldSvg ? oldSvg.style.maxWidth : ''; const savedWidth = oldSvg ? oldSvg.style.width : '';
+  m.setAttribute('data-original-code', newCode); m.innerHTML=''; m.textContent = newCode; m.removeAttribute('data-processed');
   try {
     await mermaid.run({ nodes: [m] });
     const newSvg = m.querySelector('svg');
-    if(newSvg){
-      if(savedMaxWidth) newSvg.style.maxWidth = savedMaxWidth;
-      if(savedWidth) newSvg.style.width = savedWidth;
-    }
+    if(newSvg){ if(savedMaxWidth) newSvg.style.maxWidth = savedMaxWidth; if(savedWidth) newSvg.style.width = savedWidth; }
     showToast('✅ نمودار ویرایش شد');
-  } catch(err){
-    console.error(err);
-    showToast('❌ خطا در رندر نمودار — کد را بررسی کنید');
-  }
-
-  editingMermaidWrapper = null;
-  closeModal('mermaidEditModal');
-  saveState();
+  } catch(err){ showToast('❌ خطا در رندر'); }
+  editingMermaidWrapper = null; closeModal('mermaidEditModal'); saveState();
 }
-
-function getMermaidContainerWidth(wrapper){
-  const m = wrapper.querySelector('.mermaid');
-  return (m && m.clientWidth) ? m.clientWidth : 800;
-}
+function getMermaidContainerWidth(wrapper){ const m = wrapper.querySelector('.mermaid'); return (m && m.clientWidth) ? m.clientWidth : 800; }
 function resizeMermaid(r){
-  const wrapper = r.closest('.mermaid-wrapper');
-  const svg = wrapper.querySelector('svg');
-  const pctInput = wrapper.querySelector('.mm-pct');
-  if (svg) {
-    svg.style.maxWidth = r.value + 'px';
-    svg.style.width = '100%';
-    svg.style.height = 'auto';
-  }
-  if (pctInput) {
-    const cw = getMermaidContainerWidth(wrapper);
-    pctInput.value = Math.max(10, Math.min(200, Math.round((r.value / cw) * 100)));
-  }
+  const wrapper = r.closest('.mermaid-wrapper'); const svg = wrapper.querySelector('svg'); const pctInput = wrapper.querySelector('.mm-pct');
+  if (svg) { svg.style.maxWidth = r.value + 'px'; svg.style.width = '100%'; svg.style.height = 'auto'; }
+  if (pctInput) { const cw = getMermaidContainerWidth(wrapper); pctInput.value = Math.max(10, Math.min(200, Math.round((r.value / cw) * 100))); }
   saveState();
 }
 function resizeMermaidPct(inp){
-  const wrapper = inp.closest('.mermaid-wrapper');
-  const svg = wrapper.querySelector('svg');
-  const rng = wrapper.querySelector('.mm-slider');
-  let pct = parseInt(inp.value) || 100;
-  pct = Math.max(10, Math.min(200, pct));
-  inp.value = pct;
-  if (svg) {
-    if (pct <= 100) {
-      svg.style.maxWidth = pct + '%';
-      svg.style.width = '100%';
-    } else {
-      svg.style.maxWidth = 'none';
-      svg.style.width = pct + '%';
-    }
-    svg.style.height = 'auto';
-  }
-  if (rng) {
-    const cw = getMermaidContainerWidth(wrapper);
-    rng.value = Math.max(150, Math.min(1400, Math.round((pct / 100) * cw)));
-  }
+  const wrapper = inp.closest('.mermaid-wrapper'); const svg = wrapper.querySelector('svg'); const rng = wrapper.querySelector('.mm-slider');
+  let pct = parseInt(inp.value) || 100; pct = Math.max(10, Math.min(200, pct)); inp.value = pct;
+  if (svg) { if (pct <= 100) { svg.style.maxWidth = pct + '%'; svg.style.width = '100%'; } else { svg.style.maxWidth = 'none'; svg.style.width = pct + '%'; } svg.style.height = 'auto'; }
+  if (rng) { const cw = getMermaidContainerWidth(wrapper); rng.value = Math.max(150, Math.min(1400, Math.round((pct / 100) * cw))); }
   saveState();
 }
 function fitMermaid(btn, mode){
-  const wrapper = btn.closest('.mermaid-wrapper');
-  const svg = wrapper.querySelector('svg');
-  const rng = wrapper.querySelector('.mm-slider');
-  const pctInput = wrapper.querySelector('.mm-pct');
+  const wrapper = btn.closest('.mermaid-wrapper'); const svg = wrapper.querySelector('svg');
+  const rng = wrapper.querySelector('.mm-slider'); const pctInput = wrapper.querySelector('.mm-pct');
   if(!svg) return;
-  if(mode==='container'){
-    svg.style.maxWidth='100%';
-    svg.style.width='100%';
-    if(rng) rng.value=1400;
-    if(pctInput) pctInput.value=100;
-  }
-  else {
-    svg.style.maxWidth='800px';
-    svg.style.width='100%';
-    if(rng) rng.value=800;
-    if(pctInput){
-      const cw = getMermaidContainerWidth(wrapper);
-      pctInput.value = Math.max(10, Math.min(200, Math.round((800 / cw) * 100)));
-    }
-  }
+  if(mode==='container'){ svg.style.maxWidth='100%'; svg.style.width='100%'; if(rng) rng.value=1400; if(pctInput) pctInput.value=100; }
+  else { svg.style.maxWidth='800px'; svg.style.width='100%'; if(rng) rng.value=800; if(pctInput){ const cw = getMermaidContainerWidth(wrapper); pctInput.value = Math.max(10, Math.min(200, Math.round((800 / cw) * 100))); } }
   saveState();
 }
 function zoomMermaid(btn, factor){
-  const wrapper = btn.closest('.mermaid-wrapper');
-  const svg = wrapper.querySelector('svg');
-  const rng = wrapper.querySelector('.mm-slider');
-  const pctInput = wrapper.querySelector('.mm-pct');
+  const wrapper = btn.closest('.mermaid-wrapper'); const svg = wrapper.querySelector('svg'); const rng = wrapper.querySelector('.mm-slider'); const pctInput = wrapper.querySelector('.mm-pct');
   if(!svg || !rng) return;
-  let newVal = Math.round(parseInt(rng.value) * factor);
-  newVal = Math.max(150, Math.min(1400, newVal));
-  rng.value = newVal;
-  svg.style.maxWidth = newVal + 'px';
-  svg.style.width = '100%';
-  svg.style.height = 'auto';
-  if(pctInput){
-    const cw = getMermaidContainerWidth(wrapper);
-    pctInput.value = Math.max(10, Math.min(200, Math.round((newVal / cw) * 100)));
-  }
+  let newVal = Math.round(parseInt(rng.value) * factor); newVal = Math.max(150, Math.min(1400, newVal));
+  rng.value = newVal; svg.style.maxWidth = newVal + 'px'; svg.style.width = '100%'; svg.style.height = 'auto';
+  if(pctInput){ const cw = getMermaidContainerWidth(wrapper); pctInput.value = Math.max(10, Math.min(200, Math.round((newVal / cw) * 100))); }
   saveState();
 }
-
-/* =========================================================
-   رندر
-========================================================= */
-let renderTimeout;
-function renderPreview(){
-  preview.innerHTML = marked.parse(input.value);
-  processMermaidDiagrams();
+function rerenderAllMermaids(){
+  const wrappers = preview.querySelectorAll('.mermaid-wrapper'); const saved = [];
+  wrappers.forEach(w => {
+    const m = w.querySelector('.mermaid'); if(!m || !m.getAttribute('data-original-code')) return;
+    const oldSvg = m.querySelector('svg');
+    saved.push({ m, maxWidth: oldSvg ? oldSvg.style.maxWidth : '', width: oldSvg ? oldSvg.style.width : '' });
+    m.innerHTML = ''; m.textContent = m.getAttribute('data-original-code'); m.removeAttribute('data-processed');
+  });
+  if(!saved.length) return;
+  mermaid.run({ nodes: saved.map(s => s.m) }).then(() => {
+    saved.forEach(s => { const svg = s.m.querySelector('svg'); if(svg){ if(s.maxWidth) svg.style.maxWidth = s.maxWidth; if(s.width) svg.style.width = s.width; } });
+  }).catch(e => console.error('mermaid rerender:', e));
 }
-input.addEventListener('input', () => {
-  clearTimeout(renderTimeout);
-  renderTimeout = setTimeout(() => { renderPreview(); saveState(); }, 400);
-});
 
-/* =========================================================
-   پنل جستجو
-========================================================= */
+/* ============ Render ============ */
+let renderTimeout;
+function renderPreview(){ preview.innerHTML = marked.parse(input.value); processMermaidDiagrams(); }
+input.addEventListener('input', () => { clearTimeout(renderTimeout); renderTimeout = setTimeout(() => { renderPreview(); saveState(); }, 400); });
+
+/* ============ Search Panel ============ */
 function toggleSearchPanel() {
   const panel = document.getElementById('searchPanel');
   panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
 }
 function applyStyleToSearchMatches() {
   const term = document.getElementById('findInput').value.trim();
-  if (!term) { alert('لطفاً کلمه‌ای برای جستجو وارد کنید.'); return; }
+  if (!term) { alert('لطفاً کلمه‌ای وارد کنید.'); return; }
   const replaceTerm = document.getElementById('replaceInput').value.trim();
   const styles = {
     color: document.getElementById('findColor').value,
@@ -966,30 +760,23 @@ function applyStyleToSearchMatches() {
 }
 function highlightAndReplaceSearchTerm(root, term, replaceTerm, styles) {
   const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-  const textNodes = [];
-  let node;
+  const textNodes = []; let node;
   while (node = walk.nextNode()) {
     const parent = node.parentElement;
-    if (parent && (
-        parent.closest('.katex') || parent.closest('.mermaid') || parent.closest('.mermaid-wrapper') ||
-        parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' ||
-        parent.closest('code') || parent.closest('pre')
-    )) continue;
+    if (parent && (parent.closest('.katex') || parent.closest('.mermaid') || parent.closest('.mermaid-wrapper') || parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' || parent.closest('code') || parent.closest('pre'))) continue;
     textNodes.push(node);
   }
   const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp(`(${escapedTerm})`, 'gi');
   const targetText = replaceTerm !== "" ? replaceTerm : term;
   for (let i = textNodes.length - 1; i >= 0; i--) {
-    const tNode = textNodes[i];
-    const text = tNode.nodeValue;
+    const tNode = textNodes[i]; const text = tNode.nodeValue;
     if (regex.test(text)) {
       const fragment = document.createDocumentFragment();
       const parts = text.split(regex);
       parts.forEach(part => {
         if (part.toLowerCase() === term.toLowerCase()) {
-          const span = document.createElement('span');
-          span.textContent = targetText;
+          const span = document.createElement('span'); span.textContent = targetText;
           if (styles.color) span.style.color = styles.color;
           if (styles.fontSize) span.style.fontSize = styles.fontSize;
           if (styles.fontFamily) span.style.fontFamily = styles.fontFamily;
@@ -997,15 +784,12 @@ function highlightAndReplaceSearchTerm(root, term, replaceTerm, styles) {
           if (styles.italic) span.style.fontStyle = 'italic';
           if (styles.underline) span.style.textDecoration = 'underline';
           if (styles.align || styles.dir) {
-            let parentBlock = tNode.parentElement;
-            const blockTags = ['P','H1','H2','H3','H4','H5','H6','LI','BLOCKQUOTE','TD','TH','DIV'];
-            while (parentBlock && parentBlock !== root && !blockTags.includes(parentBlock.tagName)) parentBlock = parentBlock.parentElement;
-            if (parentBlock && parentBlock !== root) {
-              if (styles.align) parentBlock.style.textAlign = styles.align;
-              if (styles.dir) {
-                parentBlock.style.direction = styles.dir;
-                if (!styles.align) parentBlock.style.textAlign = styles.dir === 'rtl' ? 'right' : 'left';
-              }
+            let pb = tNode.parentElement;
+            const bt = ['P','H1','H2','H3','H4','H5','H6','LI','BLOCKQUOTE','TD','TH','DIV'];
+            while (pb && pb !== root && !bt.includes(pb.tagName)) pb = pb.parentElement;
+            if (pb && pb !== root) {
+              if (styles.align) pb.style.textAlign = styles.align;
+              if (styles.dir) { pb.style.direction = styles.dir; if (!styles.align) pb.style.textAlign = styles.dir === 'rtl' ? 'right' : 'left'; }
             }
           }
           fragment.appendChild(span);
@@ -1016,24 +800,20 @@ function highlightAndReplaceSearchTerm(root, term, replaceTerm, styles) {
   }
 }
 
-/* =========================================================
-   ذخیره / بارگذاری پروژه JZV
-========================================================= */
+/* ============ Export/Load Project ============ */
 async function exportProject() {
-  const projectData = { version:"2.0", md:input.value, preview:preview.innerHTML, globalAlign:preview.style.textAlign, globalDir:preview.style.direction };
+  const projectData = {
+    version:"2.0", md:input.value, preview:preview.innerHTML,
+    globalAlign:preview.style.textAlign, globalDir:preview.style.direction,
+    theme: { current: currentTemplate, values: getLiveTemplateForExport() }
+  };
   const json = JSON.stringify(projectData, null, 2);
   const suggested = "draft_project.jzv";
   if (window.showSaveFilePicker) {
     try {
-      const handle = await window.showSaveFilePicker({
-        suggestedName: suggested,
-        types: [{ description: 'پروژه JZV', accept: { 'application/json': ['.jzv'] } }]
-      });
-      const writable = await handle.createWritable();
-      await writable.write(new Blob([json], { type: 'application/json' }));
-      await writable.close();
-      showToast('✅ پروژه در مسیر انتخابی ذخیره شد.');
-      return;
+      const handle = await window.showSaveFilePicker({ suggestedName: suggested, types: [{ description: 'پروژه JZV', accept: { 'application/json': ['.jzv'] } }] });
+      const writable = await handle.createWritable(); await writable.write(new Blob([json], { type: 'application/json' })); await writable.close();
+      showToast('✅ پروژه ذخیره شد.'); return;
     } catch (err) { if (err && err.name === 'AbortError') return; }
   }
   saveAs(new Blob([json], { type: "application/json" }), suggested);
@@ -1047,21 +827,24 @@ function loadProjectFile(file) {
     try {
       const data = JSON.parse(evt.target.result);
       if (data.md !== undefined && data.preview !== undefined) {
-        input.value = data.md;
-        preview.innerHTML = data.preview;
+        input.value = data.md; preview.innerHTML = data.preview;
         if (data.globalAlign) preview.style.textAlign = data.globalAlign;
         if (data.globalDir) preview.style.direction = data.globalDir;
+        if (data.theme && data.theme.values){
+          applyTemplateValues(data.theme.values);
+          if(data.theme.current && getAllTemplates()[data.theme.current]) currentTemplate = data.theme.current;
+          persistTemplates();
+        }
         renderMathInElement(preview,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false});
         preview.querySelectorAll('.mermaid-wrapper').forEach(w => {
           w.setAttribute('contenteditable', 'false');
           const m = w.querySelector('.mermaid');
           if(m && m.getAttribute('data-original-code')) { m.innerHTML=''; m.textContent = m.getAttribute('data-original-code'); m.removeAttribute('data-processed'); }
         });
-        processMermaidDiagrams();
-        saveState();
-        showToast('✅ پروژه با موفقیت بازیابی شد.');
+        processMermaidDiagrams(); saveState();
+        showToast('✅ پروژه بازیابی شد.');
       } else alert('فرمت فایل نامعتبر است.');
-    } catch (err) { alert('خطا در پردازش فایل پروژه: ' + err.message); }
+    } catch (err) { alert('خطا: ' + err.message); }
   };
   reader.readAsText(file);
 }
@@ -1072,88 +855,58 @@ window.addEventListener('drop', e => {
   if (file && file.name.endsWith('.jzv')) loadProjectFile(file);
 });
 
-/* =========================================================
-   تغییر اندازه پنل‌ها
-========================================================= */
+/* ============ Resizer ============ */
 const resizer=document.getElementById('resizer'),lp=document.getElementById('leftPanel'),rp=document.getElementById('rightPanel'),cont=document.querySelector('.container');
 let isR=false;
 resizer.addEventListener('mousedown',()=>{isR=true;document.body.style.cursor='ew-resize';document.body.style.userSelect='none'});
 document.addEventListener('mousemove',e=>{if(!isR)return;const r=cont.getBoundingClientRect();let p=((e.clientX-r.left)/r.width)*100;p=Math.max(20,Math.min(80,p));lp.style.flex=`0 0 ${p}%`;rp.style.flex=`0 0 ${100-p}%`});
 document.addEventListener('mouseup',()=>{if(isR){isR=false;document.body.style.cursor='';document.body.style.userSelect=''}});
 
-/* =========================================================
-   تراز و جهت
-========================================================= */
+/* ============ Align & Dir ============ */
 function setGlobalAlign(a){
-  preview.style.textAlign=a;
-  input.style.textAlign=a;
+  preview.style.textAlign=a; input.style.textAlign=a;
   ['R','C','L'].forEach(k=>document.getElementById('gbtn'+k).classList.remove('active'));
   document.getElementById('gbtn'+(a==='right'?'R':a==='center'?'C':'L')).classList.add('active');
   saveState();
 }
 function setDir(d){ preview.style.direction=d; input.style.direction=d; saveState(); }
 
-/* =========================================================
-   فول‌ویو
-========================================================= */
+/* ============ Fullview ============ */
 function updateBodyFullviewClass(){
   const c = document.getElementById('mainContainer');
-  const active = c.classList.contains('md-fullview') || c.classList.contains('preview-fullview');
-  document.body.classList.toggle('fullview-active', active);
+  document.body.classList.toggle('fullview-active', c.classList.contains('md-fullview') || c.classList.contains('preview-fullview'));
 }
 function toggleMarkdownFullview(){
   const c = document.getElementById('mainContainer');
-  c.classList.remove('preview-fullview');
-  document.getElementById('btnPreviewFullview').classList.remove('active');
+  c.classList.remove('preview-fullview'); document.getElementById('btnPreviewFullview').classList.remove('active');
   c.classList.toggle('md-fullview');
-  const isActive = c.classList.contains('md-fullview');
-  document.getElementById('btnMdFullview').classList.toggle('active', isActive);
+  document.getElementById('btnMdFullview').classList.toggle('active', c.classList.contains('md-fullview'));
   updateBodyFullviewClass();
-  showToast(isActive ? '🖥 فول‌ویو ورودی فعال — Esc برای خروج' : '↩ حالت عادی');
 }
 function togglePreviewFullview(){
   const c = document.getElementById('mainContainer');
-  c.classList.remove('md-fullview');
-  document.getElementById('btnMdFullview').classList.remove('active');
+  c.classList.remove('md-fullview'); document.getElementById('btnMdFullview').classList.remove('active');
   c.classList.toggle('preview-fullview');
-  const isActive = c.classList.contains('preview-fullview');
-  document.getElementById('btnPreviewFullview').classList.toggle('active', isActive);
+  document.getElementById('btnPreviewFullview').classList.toggle('active', c.classList.contains('preview-fullview'));
   updateBodyFullviewClass();
-  showToast(isActive ? '👁 فول‌ویو پیش‌نمایش فعال — Esc برای خروج' : '↩ حالت عادی');
 }
 
-/* =========================================================
-   همگام‌سازی اسکرول
-========================================================= */
-let scrollSyncEnabled = false;
-let scrollLock = false;
+/* ============ Scroll Sync ============ */
+let scrollSyncEnabled = false; let scrollLock = false;
 function toggleScrollSync(){
   scrollSyncEnabled = !scrollSyncEnabled;
   document.getElementById('btnSyncScroll').classList.toggle('active', scrollSyncEnabled);
-  showToast(scrollSyncEnabled ? '🔗 هم‌گام‌سازی اسکرول فعال شد' : '⭕ هم‌گام‌سازی اسکرول غیرفعال شد');
+  showToast(scrollSyncEnabled ? '🔗 هم‌گام فعال' : '⭕ هم‌گام غیرفعال');
 }
-input.addEventListener('scroll', () => {
-  if (!scrollSyncEnabled || scrollLock) return;
-  scrollLock = true;
-  syncScroll(input, preview);
-  requestAnimationFrame(() => { scrollLock = false; });
-});
-preview.addEventListener('scroll', () => {
-  if (!scrollSyncEnabled || scrollLock) return;
-  scrollLock = true;
-  syncScroll(preview, input);
-  requestAnimationFrame(() => { scrollLock = false; });
-});
+input.addEventListener('scroll', () => { if (!scrollSyncEnabled || scrollLock) return; scrollLock = true; syncScroll(input, preview); requestAnimationFrame(() => { scrollLock = false; }); });
+preview.addEventListener('scroll', () => { if (!scrollSyncEnabled || scrollLock) return; scrollLock = true; syncScroll(preview, input); requestAnimationFrame(() => { scrollLock = false; }); });
 function syncScroll(from, to){
-  const fromMax = from.scrollHeight - from.clientHeight;
-  const toMax = to.scrollHeight - to.clientHeight;
+  const fromMax = from.scrollHeight - from.clientHeight; const toMax = to.scrollHeight - to.clientHeight;
   if (fromMax <= 0 || toMax <= 0) return;
   to.scrollTop = (from.scrollTop / fromMax) * toMax;
 }
 
-/* =========================================================
-   تولبار انتخاب متن
-========================================================= */
+/* ============ Selection Toolbar ============ */
 const selTb=document.getElementById('selectionToolbar');
 preview.addEventListener('mouseup',showSelTb);
 preview.addEventListener('keyup',showSelTb);
@@ -1169,129 +922,62 @@ function showSelTb(){
 }
 document.addEventListener('mousedown',e=>{if(!selTb.contains(e.target))selTb.style.display='none'});
 
-/* =========================================================
-   انتخاب همه در پیش‌نمایش
-========================================================= */
 function selectAllPreview(){
   preview.focus();
-  const range = document.createRange();
-  range.selectNodeContents(preview);
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
+  const range = document.createRange(); range.selectNodeContents(preview);
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
   const pRect = preview.getBoundingClientRect();
   selTb.style.display = 'flex';
   selTb.style.top = Math.max(10, pRect.top + 20) + 'px';
   selTb.style.left = Math.max(10, Math.min(window.innerWidth-340, pRect.left + pRect.width/2 - 200)) + 'px';
 }
 
-/* =========================================================
-   رنگ‌آمیزی متن انتخاب‌شده
-========================================================= */
+/* ============ Text Styling ============ */
 let savedColorSelection = null;
 function saveColorSelection(){
   const sel = window.getSelection();
-  if(sel && sel.rangeCount > 0 && !sel.isCollapsed && preview.contains(sel.getRangeAt(0).commonAncestorContainer)){
-    savedColorSelection = sel.getRangeAt(0).cloneRange();
-  }
+  if(sel && sel.rangeCount > 0 && !sel.isCollapsed && preview.contains(sel.getRangeAt(0).commonAncestorContainer)){ savedColorSelection = sel.getRangeAt(0).cloneRange(); }
 }
 function applySelectionColor(color){
   safeStyleOp(() => {
     const sel = window.getSelection();
-    if(savedColorSelection){
-      preview.focus();
-      sel.removeAllRanges();
-      sel.addRange(savedColorSelection);
-      savedColorSelection = null;
-    }
+    if(savedColorSelection){ preview.focus(); sel.removeAllRanges(); sel.addRange(savedColorSelection); savedColorSelection = null; }
     if(sel && sel.rangeCount > 0 && !sel.isCollapsed && preview.contains(sel.getRangeAt(0).commonAncestorContainer)){
-      try {
-        document.execCommand('foreColor', false, color);
-      } catch(e){
-        const range = sel.getRangeAt(0);
-        const span = document.createElement('span');
-        span.style.color = color;
-        try { range.surroundContents(span); } catch(err){
-          const frag = range.extractContents();
-          span.appendChild(frag);
-          range.insertNode(span);
-        }
-        sel.removeAllRanges();
-        const nr = document.createRange();
-        nr.selectNodeContents(span);
-        sel.addRange(nr);
+      try { document.execCommand('foreColor', false, color); }
+      catch(e){
+        const range = sel.getRangeAt(0); const span = document.createElement('span'); span.style.color = color;
+        try { range.surroundContents(span); } catch(err){ const frag = range.extractContents(); span.appendChild(frag); range.insertNode(span); }
+        sel.removeAllRanges(); const nr = document.createRange(); nr.selectNodeContents(span); sel.addRange(nr);
       }
     }
   });
   saveState();
 }
-
-function applyStyle(command) {
-  safeStyleOp(() => document.execCommand(command, false, null));
-  saveState();
-}
-function applyCustomFont(fontName) {
-  if(!fontName) return;
-  safeStyleOp(() => document.execCommand('fontName', false, fontName));
-  saveState();
-}
+function applyStyle(command) { safeStyleOp(() => document.execCommand(command, false, null)); saveState(); }
+function applyCustomFont(fontName) { if(!fontName) return; safeStyleOp(() => document.execCommand('fontName', false, fontName)); saveState(); }
 function applyCustomSize(size) {
   if(!size) return;
   safeStyleOp(() => {
-    const sel = window.getSelection();
-    if(!sel.rangeCount || sel.isCollapsed) return;
-    const range = sel.getRangeAt(0);
-    const span = document.createElement('span');
-    span.style.fontSize = size;
-    try { range.surroundContents(span); }
-    catch(e) {
-      document.execCommand('fontSize', false, '3');
-      const fonts = preview.querySelectorAll('font[size="3"]');
-      fonts.forEach(f => { f.removeAttribute('size'); f.style.fontSize = size; });
-    }
+    const sel = window.getSelection(); if(!sel.rangeCount || sel.isCollapsed) return;
+    const range = sel.getRangeAt(0); const span = document.createElement('span'); span.style.fontSize = size;
+    try { range.surroundContents(span); } catch(e) { document.execCommand('fontSize', false, '3'); preview.querySelectorAll('font[size="3"]').forEach(f => { f.removeAttribute('size'); f.style.fontSize = size; }); }
   });
   saveState();
 }
 function triggerFontUpload() { document.getElementById('fontFileInput').click(); }
-function loadUploadedFont(e) {
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(evt) {
-    const fontName = file.name.split('.')[0].replace(/[^a-zA-Z0-9]/g, '_');
-    const fontDataUrl = evt.target.result;
-    const style = document.createElement('style');
-    style.textContent = `@font-face{font-family:'${fontName}';src:url('${fontDataUrl}');}`;
-    document.head.appendChild(style);
-    const sel = document.getElementById('selFontFamily');
-    const opt = document.createElement('option');
-    opt.value = `'${fontName}'`;
-    opt.textContent = file.name.split('.')[0];
-    sel.appendChild(opt);
-    sel.value = `'${fontName}'`;
-    applyCustomFont(`'${fontName}'`);
-  };
-  reader.readAsDataURL(file);
-}
 function applySelectionAlign(a){
   safeStyleOp(() => {
-    const sel=window.getSelection();
-    if(!sel||sel.isCollapsed)return;
-    getSelBlocks(sel.getRangeAt(0)).forEach(b=>b.style.textAlign=a);
-    sel.removeAllRanges();
+    const sel=window.getSelection(); if(!sel||sel.isCollapsed)return;
+    getSelBlocks(sel.getRangeAt(0)).forEach(b=>b.style.textAlign=a); sel.removeAllRanges();
   });
-  selTb.style.display='none';
-  saveState();
+  selTb.style.display='none'; saveState();
 }
 function applySelectionDir(d){
   safeStyleOp(() => {
-    const sel=window.getSelection();
-    if(!sel||sel.isCollapsed)return;
-    getSelBlocks(sel.getRangeAt(0)).forEach(b=>{b.style.direction=d;b.style.textAlign=d==='rtl'?'right':'left'});
-    sel.removeAllRanges();
+    const sel=window.getSelection(); if(!sel||sel.isCollapsed)return;
+    getSelBlocks(sel.getRangeAt(0)).forEach(b=>{b.style.direction=d;b.style.textAlign=d==='rtl'?'right':'left'}); sel.removeAllRanges();
   });
-  selTb.style.display='none';
-  saveState();
+  selTb.style.display='none'; saveState();
 }
 function getSelBlocks(range){
   const bt=new Set(['P','H1','H2','H3','H4','H5','H6','LI','BLOCKQUOTE','TD','TH','DIV','SECTION']),blocks=[],seen=new Set();
@@ -1307,9 +993,7 @@ function getSelBlocks(range){
 }
 function nextN(node,root){if(node.firstChild)return node.firstChild;while(node){if(node===root)return null;if(node.nextSibling)return node.nextSibling;node=node.parentNode}return null}
 
-/* =========================================================
-   مودال‌ها
-========================================================= */
+/* ============ Modals ============ */
 function openModal(id){document.getElementById(id).classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
@@ -1317,9 +1001,535 @@ function toggleSub(cbId,fieldId){document.getElementById(fieldId).className='sub
 function syncColorPick(el,textId){document.getElementById(textId).value=el.value}
 function syncColorText(el,pickId){if(/^#[0-9a-fA-F]{6}$/.test(el.value))document.getElementById(pickId).value=el.value}
 
-/* =========================================================
-   مودال تصویر
-========================================================= */
+/* ============ Fonts: IndexedDB ============ */
+const FONT_DB_NAME = 'jzv_fonts_db_v1';
+const FONT_STORE = 'fonts';
+let customFonts = [];
+
+function openFontDB(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(FONT_DB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains(FONT_STORE)) db.createObjectStore(FONT_STORE, { keyPath: 'family' });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function getAllFontsFromDB(){
+  const db = await openFontDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(FONT_STORE, 'readonly');
+    const req = tx.objectStore(FONT_STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function saveFontToDB(rec){
+  const db = await openFontDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(FONT_STORE, 'readwrite');
+    tx.objectStore(FONT_STORE).put(rec).onsuccess = () => resolve();
+  });
+}
+async function deleteFontFromDB(family){
+  const db = await openFontDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(FONT_STORE, 'readwrite');
+    tx.objectStore(FONT_STORE).delete(family).onsuccess = () => resolve();
+  });
+}
+function detectFontFormat(filename){
+  const lower = filename.toLowerCase();
+  if(lower.endsWith('.woff2')) return 'woff2';
+  if(lower.endsWith('.woff')) return 'woff';
+  if(lower.endsWith('.otf')) return 'opentype';
+  return 'truetype';
+}
+function sanitizeFontFamily(name){
+  const base = name.replace(/\.(ttf|woff2?|otf|eot)$/i, '');
+  return 'jzv_' + base.replace(/[^\p{L}\p{N}_\-]/gu, '_').slice(0, 60);
+}
+function fileToDataUrl(file){
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(file);
+  });
+}
+function rebuildFontFacesStyle(){
+  let styleEl = document.getElementById('customFontsStyle');
+  if(!styleEl){ styleEl = document.createElement('style'); styleEl.id = 'customFontsStyle'; document.head.appendChild(styleEl); }
+  styleEl.textContent = customFonts.map(f =>
+    `@font-face{font-family:'${f.family}';src:url('${f.dataUrl}') format('${f.format||'truetype'}');font-display:swap;}`
+  ).join('\n');
+}
+async function loadAndRegisterFonts(){
+  try{
+    customFonts = await getAllFontsFromDB();
+    rebuildFontFacesStyle();
+    refreshAllFontDropdowns();
+    renderFontList();
+  }catch(e){ console.error('خطا در بارگذاری فونت‌ها:', e); }
+}
+async function handleFontFiles(files){
+  let added = 0;
+  for(const file of files){
+    if(!/\.(ttf|woff2?|otf)$/i.test(file.name)) continue;
+    try{
+      const dataUrl = await fileToDataUrl(file);
+      const format = detectFontFormat(file.name);
+      let family = sanitizeFontFamily(file.name);
+      const baseFamily = family; let i = 2;
+      while(customFonts.some(f => f.family === family)) family = baseFamily + '_' + i++;
+      const rec = { family, label: file.name.replace(/\.(ttf|woff2?|otf)$/i, ''), dataUrl, format, addedAt: Date.now() };
+      await saveFontToDB(rec);
+      customFonts.push(rec);
+      added++;
+    }catch(e){ console.error('خطا:', file.name, e); }
+  }
+  rebuildFontFacesStyle(); refreshAllFontDropdowns(); renderFontList();
+  const ed = document.getElementById('templateEditor');
+  if(ed && ed.innerHTML.trim()) renderTemplateEditor();
+  if(added) showToast(`✅ ${added} فونت اضافه شد (مجموع: ${customFonts.length})`);
+  else showToast('⚠️ فایل فونت معتبر نبود');
+}
+async function loadUploadedFont(e){
+  const files = Array.from(e.target.files || []);
+  if(!files.length) return;
+  await handleFontFiles(files);
+  e.target.value = '';
+}
+async function deleteCustomFont(family){
+  if(!confirm('این فونت حذف شود؟')) return;
+  await deleteFontFromDB(family);
+  customFonts = customFonts.filter(f => f.family !== family);
+  rebuildFontFacesStyle(); refreshAllFontDropdowns(); renderFontList();
+  const ed = document.getElementById('templateEditor');
+  if(ed && ed.innerHTML.trim()) renderTemplateEditor();
+  showToast('🗑 فونت حذف شد');
+}
+function openFontModal(){ renderFontList(); openModal('fontModal'); }
+function renderFontList(){
+  const list = document.getElementById('fontList');
+  const cnt = document.getElementById('fontCount');
+  if(cnt) cnt.textContent = customFonts.length;
+  if(!list) return;
+  if(!customFonts.length){
+    list.innerHTML = '<div class="font-empty">هنوز فونتی اضافه نکرده‌اید. از کادر بالا فایل فونت را آپلود کنید.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  customFonts.forEach(f => {
+    const row = document.createElement('div');
+    row.className = 'font-row';
+    row.innerHTML = `
+      <div class="fr-info">
+        <div class="fr-name" title="${f.label}">${f.label}</div>
+        <div class="fr-preview" style="font-family:'${f.family}', sans-serif">نمونه متن — Sample Text ۱۲۳ ABC</div>
+      </div>
+      <span class="fr-tag">${(f.format||'truetype').toUpperCase()}</span>
+      <button class="fr-del" onclick="deleteCustomFont('${f.family.replace(/'/g,"\\'")}')">🗑 حذف</button>`;
+    list.appendChild(row);
+  });
+}
+
+/* ============ Font dropdown refresh ============ */
+const BASE_FONT_OPTIONS = [
+  {label:'Segoe UI',value:"'Segoe UI', Tahoma, sans-serif"},
+  {label:'Vazirmatn',value:"'Vazirmatn', sans-serif"},
+  {label:'Tahoma',value:"Tahoma, sans-serif"},
+  {label:'Arial',value:"Arial, sans-serif"},
+  {label:'Times New Roman',value:"'Times New Roman', serif"},
+  {label:'Georgia',value:"Georgia, serif"},
+  {label:'Courier New',value:"'Courier New', monospace"},
+  {label:'Consolas',value:"'Consolas', 'Courier New', monospace"}
+];
+function getAllFontOptions(){
+  const customs = customFonts.map(f => ({ label: f.label + ' (سفارشی)', value: `'${f.family}', sans-serif` }));
+  return [...BASE_FONT_OPTIONS, ...customs];
+}
+function refreshAllFontDropdowns(){
+  const opts = getAllFontOptions();
+  const selFont = document.getElementById('selFontFamily');
+  if(selFont){
+    const cur = selFont.value;
+    selFont.innerHTML = '<option value="">فونت...</option>' + opts.map(o => `<option value="${o.value.replace(/"/g,'&quot;')}">${o.label}</option>`).join('');
+    if(cur) selFont.value = cur;
+  }
+  const findFont = document.getElementById('findFont');
+  if(findFont){
+    const cur = findFont.value;
+    findFont.innerHTML = '<option value="">پیش‌فرض</option>' + opts.map(o => `<option value="${o.value.replace(/"/g,'&quot;')}">${o.label}</option>`).join('');
+    if(cur) findFont.value = cur;
+  }
+  const pnFont = document.getElementById('pnFont');
+  if(pnFont){
+    const cur = pnFont.value;
+    pnFont.innerHTML = `<option value="'Segoe UI',Tahoma,sans-serif">پیش‌فرض (Segoe UI)</option>` + opts.map(o => `<option value="${o.value.replace(/"/g,'&quot;')}">${o.label}</option>`).join('');
+    if(cur) pnFont.value = cur;
+  }
+}
+
+/* ============ Theme System ============ */
+const TEMPLATE_SCHEMA = [
+  {group:'پایه — کل بدنه', fields:[
+    {key:'bg',label:'پس‌زمینه کل',type:'color'},
+    {key:'text',label:'رنگ متن اصلی',type:'color'},
+    {key:'fontFamily',label:'فونت بدنه',type:'font',required:true},
+    {key:'fontSize',label:'اندازه بدنه',type:'text'},
+    {key:'lineHeight',label:'فاصله خطوط',type:'text'}
+  ]},
+  {group:'عناوین (H1/H2/H3)', fields:[
+    {key:'fontHeading',label:'فونت مشترک عناوین',type:'font'},
+    {key:'h1Color',label:'H1 رنگ',type:'color'},
+    {key:'h1Border',label:'H1 خط زیرین',type:'color'},
+    {key:'h1Size',label:'H1 اندازه',type:'text'},
+    {key:'h2Color',label:'H2 رنگ',type:'color'},
+    {key:'h2Border',label:'H2 خط زیرین',type:'color'},
+    {key:'h2Size',label:'H2 اندازه',type:'text'},
+    {key:'h3Color',label:'H3 رنگ',type:'color'},
+    {key:'h3Size',label:'H3 اندازه',type:'text'}
+  ]},
+  {group:'تأکید و فرمول', fields:[
+    {key:'boldColor',label:'ضخیم (Bold)',type:'color'},
+    {key:'italicColor',label:'کج (Italic)',type:'color'},
+    {key:'linkColor',label:'لینک',type:'color'},
+    {key:'mathColor',label:'فرمول — رنگ',type:'color'},
+    {key:'mathSize',label:'فرمول — اندازه',type:'text'}
+  ]},
+  {group:'نقل‌قول (Blockquote)', fields:[
+    {key:'quoteBg',label:'پس‌زمینه',type:'color'},
+    {key:'quoteBorder',label:'حاشیه کنار',type:'color'},
+    {key:'quoteText',label:'متن',type:'color'},
+    {key:'quoteFont',label:'فونت',type:'font'},
+    {key:'quoteSize',label:'اندازه',type:'text'}
+  ]},
+  {group:'کد (Inline و Block)', fields:[
+    {key:'inlineCodeBg',label:'کد درون‌خطی — پس‌زمینه',type:'color'},
+    {key:'inlineCodeText',label:'کد درون‌خطی — متن',type:'color'},
+    {key:'inlineCodeFont',label:'کد درون‌خطی — فونت',type:'font'},
+    {key:'inlineCodeSize',label:'کد درون‌خطی — اندازه',type:'text'},
+    {key:'codeBg',label:'بلوک کد — پس‌زمینه',type:'color'},
+    {key:'codeText',label:'بلوک کد — متن',type:'color'},
+    {key:'codeFont',label:'بلوک کد — فونت',type:'font'},
+    {key:'codeSize',label:'بلوک کد — اندازه',type:'text'}
+  ]},
+  {group:'جدول', fields:[
+    {key:'tableHeaderBg',label:'هدر — پس‌زمینه',type:'color'},
+    {key:'tableHeaderText',label:'هدر — متن',type:'color'},
+    {key:'tableBorder',label:'حاشیه سلول',type:'color'},
+    {key:'tableAltBg',label:'ردیف یک‌درمیان',type:'color'},
+    {key:'tableFont',label:'فونت جدول',type:'font'},
+    {key:'tableSize',label:'اندازه جدول',type:'text'}
+  ]},
+  {group:'نمودار Mermaid', fields:[
+    {key:'mermaidTheme',label:'تم نمودار',type:'select',options:[
+      {label:'پیش‌فرض',value:'default'},
+      {label:'تیره',value:'dark'},
+      {label:'جنگل',value:'forest'},
+      {label:'خنثی',value:'neutral'},
+      {label:'پایه',value:'base'}
+    ]}
+  ]},
+  {group:'سایر', fields:[
+    {key:'hrColor',label:'خط جداکننده (HR)',type:'color'}
+  ]}
+];
+
+const TEMPLATE_DEFAULTS = {
+  fontHeading:'',quoteFont:'',tableFont:'',
+  h1Size:'1.6rem',h2Size:'1.3rem',h3Size:'1.1rem',
+  quoteSize:'1rem',
+  inlineCodeFont:"'Courier New', monospace",inlineCodeSize:'0.9em',
+  codeFont:"'Courier New', monospace",codeSize:'0.9rem',
+  tableSize:'0.95rem',
+  mathSize:'1em',
+  mermaidTheme:'default'
+};
+
+const BUILTIN_TEMPLATES = {
+  default:{id:'default',name:'کلاسیک آبی',icon:'📘',builtin:true,
+    bg:'#ffffff',text:'#222222',
+    h1Color:'#1e3a5f',h1Border:'#1e3a5f',h2Color:'#2c3e50',h2Border:'#bbbbbb',h3Color:'#34495e',
+    boldColor:'#1e3a5f',italicColor:'inherit',linkColor:'#2980b9',mathColor:'#222222',
+    quoteBg:'#eef4fb',quoteBorder:'#1e3a5f',quoteText:'#2c3e50',
+    inlineCodeBg:'#f4f4f4',inlineCodeText:'#222222',
+    codeBg:'#2d2d2d',codeText:'#f8f8f2',
+    tableHeaderBg:'#1e3a5f',tableHeaderText:'#ffffff',tableBorder:'#dddddd',tableAltBg:'#f7f9fc',
+    hrColor:'#dddddd',
+    fontFamily:"'Segoe UI', Tahoma, sans-serif",fontSize:'1rem',lineHeight:'1.9',
+    mermaidTheme:'default'},
+  minimal:{id:'minimal',name:'مینیمال',icon:'⚪',builtin:true,
+    bg:'#ffffff',text:'#333333',
+    h1Color:'#111111',h1Border:'#e0e0e0',h2Color:'#222222',h2Border:'#eeeeee',h3Color:'#333333',
+    boldColor:'#111111',italicColor:'inherit',linkColor:'#555555',mathColor:'#333333',
+    quoteBg:'#f8f8f8',quoteBorder:'#dddddd',quoteText:'#555555',
+    inlineCodeBg:'#f0f0f0',inlineCodeText:'#333333',codeBg:'#f5f5f5',codeText:'#333333',
+    tableHeaderBg:'#f0f0f0',tableHeaderText:'#111111',tableBorder:'#e0e0e0',tableAltBg:'#fafafa',
+    hrColor:'#e0e0e0',fontFamily:"'Segoe UI', Tahoma, sans-serif",fontSize:'1rem',lineHeight:'1.85',
+    mermaidTheme:'neutral'},
+  dark:{id:'dark',name:'تیره',icon:'🌙',builtin:true,
+    bg:'#1e1e2e',text:'#cdd6f4',
+    h1Color:'#89b4fa',h1Border:'#89b4fa',h2Color:'#74c7ec',h2Border:'#45475a',h3Color:'#94e2d5',
+    boldColor:'#f5c2e7',italicColor:'#cba6f7',linkColor:'#89dceb',mathColor:'#cdd6f4',
+    quoteBg:'#252536',quoteBorder:'#89b4fa',quoteText:'#bac2de',
+    inlineCodeBg:'#313244',inlineCodeText:'#f5c2e7',codeBg:'#11111b',codeText:'#cdd6f4',
+    tableHeaderBg:'#313244',tableHeaderText:'#89b4fa',tableBorder:'#45475a',tableAltBg:'#252536',
+    hrColor:'#45475a',fontFamily:"'Segoe UI', Tahoma, sans-serif",fontSize:'1rem',lineHeight:'1.9',
+    mermaidTheme:'dark'},
+  academic:{id:'academic',name:'دانشگاهی',icon:'🎓',builtin:true,
+    bg:'#fdfdf9',text:'#1a1a1a',
+    h1Color:'#3a1a1a',h1Border:'#8b4513',h2Color:'#4a2a1a',h2Border:'#c9b8a8',h3Color:'#3a1a1a',
+    boldColor:'#8b0000',italicColor:'#3a1a1a',linkColor:'#6b3e26',mathColor:'#3a1a1a',
+    quoteBg:'#f5f0e6',quoteBorder:'#8b4513',quoteText:'#3a2a1a',
+    inlineCodeBg:'#f0eae0',inlineCodeText:'#4a2a1a',codeBg:'#2a2420',codeText:'#f5f0e6',
+    tableHeaderBg:'#6b3e26',tableHeaderText:'#fdfdf9',tableBorder:'#c9b8a8',tableAltBg:'#f5f0e6',
+    hrColor:'#c9b8a8',fontFamily:"'Times New Roman', Georgia, serif",fontSize:'1.05rem',lineHeight:'1.85',
+    fontHeading:"'Times New Roman', serif",quoteFont:"Georgia, serif",tableFont:"'Times New Roman', serif",
+    mermaidTheme:'default'},
+  colorful:{id:'colorful',name:'رنگی',icon:'🌈',builtin:true,
+    bg:'#ffffff',text:'#2c2c54',
+    h1Color:'#eb4d4b',h1Border:'#f0932b',h2Color:'#6c5ce7',h2Border:'#a29bfe',h3Color:'#00b894',
+    boldColor:'#eb4d4b',italicColor:'#6c5ce7',linkColor:'#0984e3',mathColor:'#eb4d4b',
+    quoteBg:'#fff5f5',quoteBorder:'#eb4d4b',quoteText:'#b71540',
+    inlineCodeBg:'#ffeaa7',inlineCodeText:'#2d3436',codeBg:'#2d3436',codeText:'#ffeaa7',
+    tableHeaderBg:'#6c5ce7',tableHeaderText:'#ffffff',tableBorder:'#dfe6e9',tableAltBg:'#f8f5ff',
+    hrColor:'#dfe6e9',fontFamily:"'Segoe UI', Tahoma, sans-serif",fontSize:'1rem',lineHeight:'1.9',
+    mermaidTheme:'forest'},
+  forest:{id:'forest',name:'جنگل',icon:'🌿',builtin:true,
+    bg:'#f7fbf7',text:'#1e3a24',
+    h1Color:'#1b5e20',h1Border:'#2e7d32',h2Color:'#2e7d32',h2Border:'#a5d6a7',h3Color:'#388e3c',
+    boldColor:'#1b5e20',italicColor:'#4e7d3a',linkColor:'#00695c',mathColor:'#1e3a24',
+    quoteBg:'#e8f5e9',quoteBorder:'#2e7d32',quoteText:'#1b5e20',
+    inlineCodeBg:'#e8f5e9',inlineCodeText:'#1b5e20',codeBg:'#1b3a20',codeText:'#e8f5e9',
+    tableHeaderBg:'#2e7d32',tableHeaderText:'#ffffff',tableBorder:'#c8e6c9',tableAltBg:'#f0f9f0',
+    hrColor:'#c8e6c9',fontFamily:"'Segoe UI', Tahoma, sans-serif",fontSize:'1rem',lineHeight:'1.9',
+    mermaidTheme:'forest'}
+};
+
+let customTemplates = {};
+let currentTemplate = 'default';
+let liveTemplateValues = {};
+let liveMermaidTheme = 'default';
+
+function getTemplateValues(tpl){ return { ...TEMPLATE_DEFAULTS, ...cleanTemplate(tpl) }; }
+function loadTemplatesFromStorage(){
+  try{ const s = localStorage.getItem('jzv_custom_templates'); if(s) customTemplates = JSON.parse(s)||{}; }catch(e){}
+  try{ const c = localStorage.getItem('jzv_current_template'); if(c) currentTemplate = c; }catch(e){}
+}
+function persistTemplates(){
+  try{
+    localStorage.setItem('jzv_custom_templates', JSON.stringify(customTemplates));
+    localStorage.setItem('jzv_current_template', currentTemplate);
+  }catch(e){}
+}
+function getAllTemplates(){ return { ...BUILTIN_TEMPLATES, ...customTemplates }; }
+function cleanTemplate(t){ const c = {...t}; delete c.id; delete c.name; delete c.icon; delete c.builtin; return c; }
+
+function applyTemplateValues(values){
+  if(!values) return;
+  liveTemplateValues = { ...values };
+  const root = document.documentElement;
+  const mainFont = values.fontFamily || "'Segoe UI', Tahoma, sans-serif";
+  const direct = {
+    bg:'--pv-bg',text:'--pv-text',
+    h1Color:'--pv-h1-color',h1Border:'--pv-h1-border',h1Size:'--pv-h1-size',
+    h2Color:'--pv-h2-color',h2Border:'--pv-h2-border',h2Size:'--pv-h2-size',
+    h3Color:'--pv-h3-color',h3Size:'--pv-h3-size',
+    boldColor:'--pv-bold-color',italicColor:'--pv-italic-color',linkColor:'--pv-link-color',
+    mathColor:'--pv-math-color',mathSize:'--pv-math-size',
+    quoteBg:'--pv-quote-bg',quoteBorder:'--pv-quote-border',quoteText:'--pv-quote-text',quoteSize:'--pv-quote-size',
+    inlineCodeBg:'--pv-inline-code-bg',inlineCodeText:'--pv-inline-code-text',
+    inlineCodeFont:'--pv-inline-code-font',inlineCodeSize:'--pv-inline-code-size',
+    codeBg:'--pv-code-bg',codeText:'--pv-code-text',
+    codeFont:'--pv-code-font',codeSize:'--pv-code-size',
+    tableHeaderBg:'--pv-table-header-bg',tableHeaderText:'--pv-table-header-text',
+    tableBorder:'--pv-table-border',tableAltBg:'--pv-table-alt-bg',tableSize:'--pv-table-size',
+    hrColor:'--pv-hr-color',
+    fontFamily:'--pv-font-family',fontSize:'--pv-font-size',lineHeight:'--pv-line-height'
+  };
+  Object.keys(direct).forEach(k => { if(values[k] !== undefined && values[k] !== '') root.style.setProperty(direct[k], values[k]); });
+  const headFont = (values.fontHeading && values.fontHeading !== '') ? values.fontHeading : mainFont;
+  root.style.setProperty('--pv-h1-font', headFont);
+  root.style.setProperty('--pv-h2-font', headFont);
+  root.style.setProperty('--pv-h3-font', headFont);
+  root.style.setProperty('--pv-quote-font', (values.quoteFont && values.quoteFont !== '') ? values.quoteFont : mainFont);
+  root.style.setProperty('--pv-table-font', (values.tableFont && values.tableFont !== '') ? values.tableFont : mainFont);
+  const newTheme = values.mermaidTheme || 'default';
+  if(liveMermaidTheme !== newTheme){
+    liveMermaidTheme = newTheme;
+    mermaid.initialize({ startOnLoad: false, theme: newTheme, securityLevel: 'loose' });
+    rerenderAllMermaids();
+  }
+}
+function applyTemplate(name){
+  const all = getAllTemplates(); const tpl = all[name];
+  if(!tpl){ showToast('❌ تمپلیت یافت نشد'); return; }
+  applyTemplateValues(getTemplateValues(tpl));
+  currentTemplate = name; persistTemplates();
+  showToast(`🎨 «${tpl.name}» اعمال شد`);
+}
+function openTemplateModal(){ renderTemplateGrid(); renderTemplateEditor(); openModal('templateModal'); }
+
+function renderTemplateGrid(){
+  const grid = document.getElementById('templateGrid');
+  const all = getAllTemplates(); grid.innerHTML = '';
+  Object.keys(all).forEach(key => {
+    const t = all[key];
+    const card = document.createElement('div');
+    card.className = 'template-card' + (key === currentTemplate ? ' active' : '');
+    card.innerHTML = `${!t.builtin ? '<span class="tc-badge">سفارشی</span>' : ''}<div class="tc-icon">${t.icon || '🎨'}</div><div class="tc-name" title="${t.name}">${t.name}</div>`;
+    card.onclick = () => { applyTemplate(key); renderTemplateGrid(); renderTemplateEditor(); updateDeleteBtn(); };
+    grid.appendChild(card);
+  });
+  const addCard = document.createElement('div');
+  addCard.className = 'template-card add-new';
+  addCard.innerHTML = '<div class="tc-icon">➕</div><div class="tc-name">تمپلیت جدید</div>';
+  addCard.onclick = () => createNewTemplateFromLive();
+  grid.appendChild(addCard);
+  updateDeleteBtn();
+}
+function updateDeleteBtn(){
+  const btn = document.getElementById('deleteTplBtn');
+  const isBuiltin = !!BUILTIN_TEMPLATES[currentTemplate];
+  btn.disabled = isBuiltin; btn.style.opacity = isBuiltin ? '.4' : '1';
+  btn.style.cursor = isBuiltin ? 'not-allowed' : 'pointer';
+}
+function renderTemplateEditor(){
+  const ed = document.getElementById('templateEditor'); ed.innerHTML = '';
+  const fontOpts = getAllFontOptions();
+  TEMPLATE_SCHEMA.forEach(grp => {
+    const h = document.createElement('div'); h.className = 'tpl-group'; h.textContent = grp.group; ed.appendChild(h);
+    grp.fields.forEach(f => {
+      const wrap = document.createElement('div'); wrap.className = 'tpl-field';
+      const lbl = document.createElement('label'); lbl.textContent = f.label;
+      let input;
+      if(f.type === 'color'){
+        input = document.createElement('input'); input.type = 'color';
+        input.value = normalizeColor(liveTemplateValues[f.key]) || '#000000';
+        input.oninput = () => { liveTemplateValues[f.key] = input.value; applyLiveField(f.key, input.value); };
+      } else if(f.type === 'font'){
+        input = document.createElement('select');
+        if(!f.required){
+          const o = document.createElement('option'); o.value = ''; o.textContent = '(ارث از بدنه)'; input.appendChild(o);
+          if(!liveTemplateValues[f.key]) o.selected = true;
+        }
+        fontOpts.forEach(o => {
+          const op = document.createElement('option'); op.value = o.value; op.textContent = o.label;
+          if(liveTemplateValues[f.key] === o.value) op.selected = true;
+          input.appendChild(op);
+        });
+        input.onchange = () => { liveTemplateValues[f.key] = input.value; applyLiveField(f.key, input.value); };
+      } else if(f.type === 'select'){
+        input = document.createElement('select');
+        (f.options||[]).forEach(o => {
+          const op = document.createElement('option'); op.value = o.value; op.textContent = o.label;
+          if(liveTemplateValues[f.key] === o.value) op.selected = true;
+          input.appendChild(op);
+        });
+        input.onchange = () => { liveTemplateValues[f.key] = input.value; applyLiveField(f.key, input.value); };
+      } else {
+        input = document.createElement('input'); input.type = 'text';
+        input.value = liveTemplateValues[f.key] ?? '';
+        input.oninput = () => { liveTemplateValues[f.key] = input.value; applyLiveField(f.key, input.value); };
+      }
+      wrap.appendChild(lbl); wrap.appendChild(input); ed.appendChild(wrap);
+    });
+  });
+}
+function normalizeColor(v){
+  if(!v) return '';
+  if(/^#[0-9a-fA-F]{6}$/.test(v)) return v;
+  if(/^#[0-9a-fA-F]{3}$/.test(v)) return '#' + v[1]+v[1]+v[2]+v[2]+v[3]+v[3];
+  return '';
+}
+function applyLiveField(key, value){
+  const root = document.documentElement;
+  const mainFont = liveTemplateValues.fontFamily || "'Segoe UI', Tahoma, sans-serif";
+  if(key === 'fontHeading'){ const f = value || mainFont; root.style.setProperty('--pv-h1-font', f); root.style.setProperty('--pv-h2-font', f); root.style.setProperty('--pv-h3-font', f); return; }
+  if(key === 'quoteFont'){ root.style.setProperty('--pv-quote-font', value || mainFont); return; }
+  if(key === 'tableFont'){ root.style.setProperty('--pv-table-font', value || mainFont); return; }
+  if(key === 'fontFamily'){
+    root.style.setProperty('--pv-font-family', value);
+    const hf = (liveTemplateValues.fontHeading && liveTemplateValues.fontHeading !== '') ? liveTemplateValues.fontHeading : value;
+    root.style.setProperty('--pv-h1-font', hf); root.style.setProperty('--pv-h2-font', hf); root.style.setProperty('--pv-h3-font', hf);
+    const qf = (liveTemplateValues.quoteFont && liveTemplateValues.quoteFont !== '') ? liveTemplateValues.quoteFont : value;
+    root.style.setProperty('--pv-quote-font', qf);
+    const tf = (liveTemplateValues.tableFont && liveTemplateValues.tableFont !== '') ? liveTemplateValues.tableFont : value;
+    root.style.setProperty('--pv-table-font', tf);
+    return;
+  }
+  if(key === 'mermaidTheme'){
+    liveMermaidTheme = value; mermaid.initialize({ startOnLoad: false, theme: value, securityLevel: 'loose' }); rerenderAllMermaids(); return;
+  }
+  const direct = {
+    bg:'--pv-bg',text:'--pv-text',
+    h1Color:'--pv-h1-color',h1Border:'--pv-h1-border',h1Size:'--pv-h1-size',
+    h2Color:'--pv-h2-color',h2Border:'--pv-h2-border',h2Size:'--pv-h2-size',
+    h3Color:'--pv-h3-color',h3Size:'--pv-h3-size',
+    boldColor:'--pv-bold-color',italicColor:'--pv-italic-color',linkColor:'--pv-link-color',
+    mathColor:'--pv-math-color',mathSize:'--pv-math-size',
+    quoteBg:'--pv-quote-bg',quoteBorder:'--pv-quote-border',quoteText:'--pv-quote-text',quoteSize:'--pv-quote-size',
+    inlineCodeBg:'--pv-inline-code-bg',inlineCodeText:'--pv-inline-code-text',
+    inlineCodeFont:'--pv-inline-code-font',inlineCodeSize:'--pv-inline-code-size',
+    codeBg:'--pv-code-bg',codeText:'--pv-code-text',
+    codeFont:'--pv-code-font',codeSize:'--pv-code-size',
+    tableHeaderBg:'--pv-table-header-bg',tableHeaderText:'--pv-table-header-text',
+    tableBorder:'--pv-table-border',tableAltBg:'--pv-table-alt-bg',tableSize:'--pv-table-size',
+    hrColor:'--pv-hr-color',
+    fontSize:'--pv-font-size',lineHeight:'--pv-line-height'
+  };
+  if(direct[key]) root.style.setProperty(direct[key], value);
+}
+function createNewTemplateFromLive(){
+  const name = prompt('نام تمپلیت جدید:', 'تمپلیت من ' + (Object.keys(customTemplates).length + 1));
+  if(!name || !name.trim()) return;
+  const id = 'custom_' + Date.now();
+  customTemplates[id] = { id, name: name.trim(), icon: '✨', builtin: false, ...liveTemplateValues };
+  currentTemplate = id; persistTemplates();
+  renderTemplateGrid(); renderTemplateEditor(); updateDeleteBtn();
+  showToast('✅ تمپلیت جدید ساخته و در حافظه مرورگر ذخیره شد');
+}
+function deleteCurrentTemplate(){
+  if(BUILTIN_TEMPLATES[currentTemplate]){ showToast('❌ تمپلیت‌های پیش‌فرض حذف نمی‌شوند'); return; }
+  if(!customTemplates[currentTemplate]) return;
+  if(!confirm('این تمپلیت حذف شود؟')) return;
+  delete customTemplates[currentTemplate];
+  applyTemplate('default'); persistTemplates();
+  renderTemplateGrid(); renderTemplateEditor();
+  showToast('🗑 تمپلیت حذف شد');
+}
+function applyCurrentLiveTemplate(){ persistTemplates(); showToast('✅ تمپلیت اعمال و ذخیره شد'); closeModal('templateModal'); }
+function exportTemplatesJSON(){
+  const data = { version:1, templates: { ...BUILTIN_TEMPLATES, ...customTemplates } };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  saveAs(blob, 'jzv_templates.json'); showToast('⬇ فایل تمپلیت‌ها دانلود شد');
+}
+function importTemplatesJSON(e){
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try{
+      const data = JSON.parse(ev.target.result);
+      if(!data.templates) throw new Error('ساختار فایل نامعتبر');
+      let count = 0;
+      Object.entries(data.templates).forEach(([k, v]) => {
+        if(BUILTIN_TEMPLATES[k]) return;
+        const id = v.id || ('custom_' + Date.now() + '_' + Math.random().toString(36).slice(2,7));
+        customTemplates[id] = { ...v, id, builtin:false }; count++;
+      });
+      persistTemplates(); renderTemplateGrid(); renderTemplateEditor();
+      showToast(`✅ ${count} تمپلیت اضافه شد`);
+    }catch(err){ alert('خطا: ' + err.message); }
+  };
+  r.readAsText(file); e.target.value = '';
+}
+function getLiveTemplateForExport(){ return { ...liveTemplateValues }; }
+
+/* ============ Image Modal ============ */
 let savedRange=null,imgBase64=null;
 function openImgModal(){
   const sel=window.getSelection();
@@ -1352,15 +1562,10 @@ function handlePasteEvent(e,zoneEl,onImage){
   for(const item of items){
     if(item.type && item.type.startsWith('image/')){
       e.preventDefault();
-      const file=item.getAsFile();
-      if(!file) continue;
+      const file=item.getAsFile(); if(!file) continue;
       const r=new FileReader();
-      r.onload=ev=>{
-        onImage(ev.target.result);
-        if(zoneEl){zoneEl.classList.add('paste-flash');setTimeout(()=>zoneEl.classList.remove('paste-flash'),500)}
-      };
-      r.readAsDataURL(file);
-      return;
+      r.onload=ev=>{ onImage(ev.target.result); if(zoneEl){zoneEl.classList.add('paste-flash');setTimeout(()=>zoneEl.classList.remove('paste-flash'),500)} };
+      r.readAsDataURL(file); return;
     }
   }
 }
@@ -1375,165 +1580,84 @@ function confirmInsertImage(){
   const url=imgBase64||document.getElementById('imgUrlInput').value.trim();
   const width=document.getElementById('imgWidthInput').value.trim()||'300';
   const align=document.getElementById('imgAlignInput').value;
-  if(!url){alert('لطفاً یک تصویر انتخاب کنید (آپلود، URL، یا Ctrl+V).');return}
-  buildImgWrapper(url,width,align);
-  closeModal('imgModal');
+  if(!url){alert('لطفاً یک تصویر انتخاب کنید.');return}
+  buildImgWrapper(url,width,align); closeModal('imgModal');
 }
 function buildImgWrapper(url,width,align){
   const wrapper=document.createElement('div');
-  wrapper.className='img-wrapper';
-  // 🔥 محافظت از تصویر
-  wrapper.setAttribute('contenteditable', 'false');
+  wrapper.className='img-wrapper'; wrapper.setAttribute('contenteditable', 'false');
   const w=parseInt(width)||300;
-  const toolbar=document.createElement('div');
-  toolbar.className='img-toolbar';
+  const toolbar=document.createElement('div'); toolbar.className='img-toolbar';
   toolbar.innerHTML=`<label>عرض: <input type="range" class="img-slider" min="50" max="800" value="${w}" oninput="resizeImg(this)"></label>
     <label><input type="number" class="img-pct" min="5" max="100" value="100" oninput="resizeImgPct(this)">%</label>
     <div class="tb-sep"></div>
-    <button onclick="alignImg(this,'right')">راست</button>
-    <button onclick="alignImg(this,'center')">وسط</button>
-    <button onclick="alignImg(this,'left')">چپ</button>
-    <div class="tb-sep"></div>
-    <button class="del" onclick="removeImg(this)">🗑 حذف</button>`;
-  const inner=document.createElement('div');
-  inner.className='img-inner align-'+align;
-  const img=document.createElement('img');
-  img.src=url;img.style.width=w+'px';img.draggable=false;
-  inner.appendChild(img);
-  wrapper.appendChild(toolbar);
-  wrapper.appendChild(inner);
+    <button onclick="alignImg(this,'right')">راست</button><button onclick="alignImg(this,'center')">وسط</button><button onclick="alignImg(this,'left')">چپ</button>
+    <div class="tb-sep"></div><button class="del" onclick="removeImg(this)">🗑 حذف</button>`;
+  const inner=document.createElement('div'); inner.className='img-inner align-'+align;
+  const img=document.createElement('img'); img.src=url; img.style.width=w+'px'; img.draggable=false;
+  inner.appendChild(img); wrapper.appendChild(toolbar); wrapper.appendChild(inner);
   if(savedRange){
-    savedRange.collapse(false);savedRange.insertNode(wrapper);
-    const nr=document.createRange();nr.setStartAfter(wrapper);nr.collapse(true);
-    const sel=window.getSelection();sel.removeAllRanges();sel.addRange(nr);
+    savedRange.collapse(false); savedRange.insertNode(wrapper);
+    const nr=document.createRange(); nr.setStartAfter(wrapper); nr.collapse(true);
+    const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(nr);
   } else { preview.appendChild(wrapper); }
   saveState();
 }
-function resizeImg(r){
-  const wrapper = r.closest('.img-wrapper');
-  const img = wrapper.querySelector('img');
-  const pctInput = wrapper.querySelector('.img-pct');
-  if (img) img.style.width = r.value + 'px';
-  if (pctInput) {
-    const cw = wrapper.querySelector('.img-inner').clientWidth || 800;
-    pctInput.value = Math.max(5, Math.min(100, Math.round((r.value / cw) * 100)));
-  }
-  saveState();
-}
-function resizeImgPct(inp){
-  const wrapper = inp.closest('.img-wrapper');
-  const img = wrapper.querySelector('img');
-  const slider = wrapper.querySelector('.img-slider');
-  let pct = parseInt(inp.value) || 100;
-  pct = Math.max(5, Math.min(100, pct));
-  inp.value = pct;
-  if (img) img.style.width = pct + '%';
-  if (slider) {
-    const cw = wrapper.querySelector('.img-inner').clientWidth || 800;
-    slider.value = Math.max(50, Math.min(800, Math.round((pct / 100) * cw)));
-  }
-  saveState();
-}
+function resizeImg(r){ const wrapper=r.closest('.img-wrapper'); const img=wrapper.querySelector('img'); const pctInput=wrapper.querySelector('.img-pct'); if(img)img.style.width=r.value+'px'; if(pctInput){const cw=wrapper.querySelector('.img-inner').clientWidth||800; pctInput.value=Math.max(5,Math.min(100,Math.round((r.value/cw)*100)));} saveState(); }
+function resizeImgPct(inp){ const wrapper=inp.closest('.img-wrapper'); const img=wrapper.querySelector('img'); const slider=wrapper.querySelector('.img-slider'); let pct=parseInt(inp.value)||100; pct=Math.max(5,Math.min(100,pct)); inp.value=pct; if(img)img.style.width=pct+'%'; if(slider){const cw=wrapper.querySelector('.img-inner').clientWidth||800; slider.value=Math.max(50,Math.min(800,Math.round((pct/100)*cw)));} saveState(); }
 function alignImg(btn,a){btn.closest('.img-wrapper').querySelector('.img-inner').className='img-inner align-'+a;saveState()}
 function removeImg(btn){btn.closest('.img-wrapper').remove();saveState()}
 
 preview.addEventListener('paste', e=>{
-  const items=(e.clipboardData||window.clipboardData)?.items;
-  if(!items) return;
+  const items=(e.clipboardData||window.clipboardData)?.items; if(!items) return;
   for(const item of items){
     if(item.type && item.type.startsWith('image/')){
       e.preventDefault();
-      const file=item.getAsFile();
-      if(!file) continue;
+      const file=item.getAsFile(); if(!file) continue;
       const r=new FileReader();
-      r.onload=ev=>{
-        const sel=window.getSelection();
-        savedRange=(sel&&sel.rangeCount&&preview.contains(sel.getRangeAt(0).commonAncestorContainer))?sel.getRangeAt(0).cloneRange():null;
-        buildImgWrapper(ev.target.result,300,'right');
-      };
-      r.readAsDataURL(file);
-      return;
+      r.onload=ev=>{ const sel=window.getSelection(); savedRange=(sel&&sel.rangeCount&&preview.contains(sel.getRangeAt(0).commonAncestorContainer))?sel.getRangeAt(0).cloneRange():null; buildImgWrapper(ev.target.result,300,'right'); };
+      r.readAsDataURL(file); return;
     }
   }
 });
 
-/* =========================================================
-   پیست هوشمند لینک مستقیم تصویر
-========================================================= */
-function isDirectImageUrl(url){
-  return /^https?:\/\/[^\s]+\.(png|jpe?g|gif|webp|svg|bmp|ico|avif)(\?[^\s]*)?(#\S*)?$/i.test(url);
-}
+function isDirectImageUrl(url){ return /^https?:\/\/[^\s]+\.(png|jpe?g|gif|webp|svg|bmp|ico|avif)(\?[^\s]*)?(#\S*)?$/i.test(url); }
 input.addEventListener('paste', e => {
-  const cd = e.clipboardData || window.clipboardData;
-  if(!cd) return;
-  const text = cd.getData('text');
-  if(!text) return;
+  const cd = e.clipboardData || window.clipboardData; if(!cd) return;
+  const text = cd.getData('text'); if(!text) return;
   const trimmed = text.trim();
   if(isDirectImageUrl(trimmed)){
     e.preventDefault();
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
+    const start = input.selectionStart, end = input.selectionEnd;
     const mdImg = `\n![](${trimmed})\n`;
-    const before = input.value.slice(0, start);
-    const after = input.value.slice(end);
-    input.value = before + mdImg + after;
-    const pos = start + mdImg.length;
-    input.selectionStart = input.selectionEnd = pos;
-    renderPreview();
-    saveState();
-    showToast('🖼 لینک مستقیم تصویر به مارک‌داون تبدیل شد');
+    input.value = input.value.slice(0, start) + mdImg + input.value.slice(end);
+    input.selectionStart = input.selectionEnd = start + mdImg.length;
+    renderPreview(); saveState(); showToast('🖼 لینک تصویر به مارک‌داون تبدیل شد');
   }
 });
 
-/* =========================================================
-   عکس کاور
-========================================================= */
-let coverImgData=null; 
+/* ============ Cover Image ============ */
+let coverImgData=null;
 const coverImgFileInput=document.getElementById('coverImgFileInput');
 const coverDropZone=document.getElementById('coverDropZone');
 const coverImgPreview=document.getElementById('coverImgPreview');
 const coverImgUrlInput=document.getElementById('coverImgUrlInput');
 const removeCoverImgBtn=document.getElementById('removeCoverImgBtn');
-
 coverImgFileInput.addEventListener('change',function(){if(this.files[0])loadCoverImgFile(this.files[0])});
 coverDropZone.addEventListener('dragover',e=>{e.preventDefault();coverDropZone.classList.add('dragover')});
 coverDropZone.addEventListener('dragleave',()=>coverDropZone.classList.remove('dragover'));
 coverDropZone.addEventListener('drop',e=>{e.preventDefault();coverDropZone.classList.remove('dragover');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadCoverImgFile(f)});
 function loadCoverImgFile(file){
   const r=new FileReader();
-  r.onload=ev=>{
-    coverImgData=ev.target.result;
-    coverImgPreview.src=coverImgData;
-    coverImgPreview.style.display='block';
-    coverImgUrlInput.value='';
-    removeCoverImgBtn.style.display='inline-block';
-    refreshCoverFitVisibility();
-    saveState();
-  };
+  r.onload=ev=>{ coverImgData=ev.target.result; coverImgPreview.src=coverImgData; coverImgPreview.style.display='block'; coverImgUrlInput.value=''; removeCoverImgBtn.style.display='inline-block'; refreshCoverFitVisibility(); saveState(); };
   r.readAsDataURL(file);
 }
 coverImgUrlInput.addEventListener('input',function(){
   const v=this.value.trim();
-  if(v){
-    coverImgData=v;
-    coverImgPreview.src=v;
-    coverImgPreview.style.display='block';
-    coverImgFileInput.value='';
-    removeCoverImgBtn.style.display='inline-block';
-    refreshCoverFitVisibility();
-    saveState();
-  } else if(!coverImgFileInput.files[0]){ clearCoverImg(); }
+  if(v){ coverImgData=v; coverImgPreview.src=v; coverImgPreview.style.display='block'; coverImgFileInput.value=''; removeCoverImgBtn.style.display='inline-block'; refreshCoverFitVisibility(); saveState(); }
+  else if(!coverImgFileInput.files[0]){ clearCoverImg(); }
 });
-function clearCoverImg(){
-  coverImgData=null;
-  coverImgFileInput.value='';
-  coverImgUrlInput.value='';
-  coverImgPreview.src='';
-  coverImgPreview.style.display='none';
-  removeCoverImgBtn.style.display='none';
-  refreshCoverFitVisibility();
-  saveState();
-}
+function clearCoverImg(){ coverImgData=null; coverImgFileInput.value=''; coverImgUrlInput.value=''; coverImgPreview.src=''; coverImgPreview.style.display='none'; removeCoverImgBtn.style.display='none'; refreshCoverFitVisibility(); saveState(); }
 function toggleCoverFit(){
   const fit=document.getElementById('coverFitPage').checked;
   document.getElementById('coverBgFieldsWrap').style.display = fit ? 'none' : 'block';
@@ -1547,15 +1671,11 @@ function refreshCoverFitVisibility(){
   if(!hasImg){ document.getElementById('coverFitPage').checked=false; toggleCoverFit(); }
 }
 
-/* =========================================================
-   صفحه کاور
-========================================================= */
+/* ============ Cover Page ============ */
 function buildCoverPage(){
   const coverPage=document.getElementById('coverPage');
   const wantCover=document.getElementById('coverToggle').checked;
-  coverPage.className='';
-  coverPage.style.cssText='';
-  coverPage.innerHTML='';
+  coverPage.className=''; coverPage.style.cssText=''; coverPage.innerHTML='';
   if(!wantCover) return;
   coverPage.classList.add('active');
   const title=document.getElementById('coverTitle').value.trim();
@@ -1565,15 +1685,12 @@ function buildCoverPage(){
     const fit=document.getElementById('coverFullFit').value;
     coverPage.classList.add('full-image-cover');
     if(fit==='contain') coverPage.classList.add('fit-contain');
-    const img=document.createElement('img');
-    img.className='cover-full-img';img.src=coverImgData;img.alt='';
+    const img=document.createElement('img'); img.className='cover-full-img'; img.src=coverImgData; img.alt='';
     coverPage.appendChild(img);
     const wantOverlay=document.getElementById('coverFullOverlayText').checked;
     if(wantOverlay && (title||sub)){
       const fg=document.getElementById('coverFgT').value||'#ffffff';
-      const overlay=document.createElement('div');
-      overlay.className='cover-full-overlay';
-      overlay.style.color=fg;
+      const overlay=document.createElement('div'); overlay.className='cover-full-overlay'; overlay.style.color=fg;
       if(title){const h=document.createElement('h1');h.textContent=title;overlay.appendChild(h)}
       if(sub){const p=document.createElement('p');p.textContent=sub;overlay.appendChild(p)}
       coverPage.appendChild(overlay);
@@ -1588,43 +1705,32 @@ function buildCoverPage(){
   }
 }
 
-/* =========================================================
-   چاپ / PDF
-========================================================= */
+/* ============ Print ============ */
 function doPrint(){
   const wantCover=document.getElementById('coverToggle').checked;
   const wantPN=document.getElementById('pnToggle').checked;
   buildCoverPage();
-
   let styleEl=document.getElementById('pnStyle');
   if(!styleEl){styleEl=document.createElement('style');styleEl.id='pnStyle';document.head.appendChild(styleEl)}
-
   if(wantPN){
     const pos=document.getElementById('pnPos').value;
     const font=document.getElementById('pnFont').value;
     const size=document.getElementById('pnSize').value;
-    const italic=document.getElementById('pnItalic').checked?'italic':'normal';
-    const bold=document.getElementById('pnBold').checked?'bold':'normal';
     const color=document.getElementById('pnColorT').value||'#666666';
     const marginMM=parseFloat(document.getElementById('pnMargin').value)||8;
     const skipCover=document.getElementById('pnSkipCover').checked;
     const sizePt = parseFloat(size) || 10;
     const textHeightMM = (sizePt * 0.3528) * 1.6;
     const pageBottomMargin = Math.max(marginMM + textHeightMM, marginMM + 6, 10);
-
-    let rule = `@page{margin: 15mm 15mm ${pageBottomMargin}mm 15mm;@bottom-${pos}{content: counter(page);font-family: ${font};font-size: ${size}pt;font-style: ${italic};font-weight: ${bold};color: ${color};vertical-align: middle;}}`;
-    if(wantCover && skipCover){
-      rule += `@page :first{@bottom-${pos}{ content: normal; }}#coverPage{ counter-reset: page 0; }`;
-    }
+    let rule = `@page{margin: 15mm 15mm ${pageBottomMargin}mm 15mm;@bottom-${pos}{content: counter(page);font-family: ${font};font-size: ${size}pt;color: ${color};vertical-align: middle;}}`;
+    if(wantCover && skipCover){ rule += `@page :first{@bottom-${pos}{ content: normal; }}#coverPage{ counter-reset: page 0; }`; }
     styleEl.textContent = rule;
   } else { styleEl.textContent = ''; }
   closeModal('pdfModal');
   setTimeout(()=>window.print(),80);
 }
 
-/* =========================================================
-   خروجی Word
-========================================================= */
+/* ============ Word Export ============ */
 async function exportWord(){
   const{Document,Paragraph,TextRun,HeadingLevel,TableRow,TableCell,Table,WidthType,AlignmentType,Packer}=docx;
   const tmp=document.createElement('div');tmp.innerHTML=preview.innerHTML;
@@ -1650,43 +1756,55 @@ async function exportWord(){
   const blob=await Packer.toBlob(doc);
   if(window.showSaveFilePicker){
     try{
-      const handle = await window.showSaveFilePicker({
-        suggestedName: 'document.docx',
-        types: [{ description: 'Word', accept: { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] } }]
-      });
-      const w = await handle.createWritable();
-      await w.write(blob);
-      await w.close();
-      showToast('✅ فایل Word ذخیره شد.');
-      return;
+      const handle = await window.showSaveFilePicker({suggestedName: 'document.docx', types: [{ description: 'Word', accept: { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] } }]});
+      const w = await handle.createWritable(); await w.write(blob); await w.close();
+      showToast('✅ فایل Word ذخیره شد.'); return;
     }catch(err){ if(err && err.name === 'AbortError') return; }
   }
   saveAs(blob,'document.docx');
 }
 
-/* =========================================================
-   همگام‌سازی و پاک‌سازی
-========================================================= */
 function syncMarkdownAndPreview(){ saveState(); }
 function clearAll(){ input.value=''; preview.innerHTML=''; saveState(); }
 
-/* =========================================================
-   مقدار پیش‌فرض
-========================================================= */
-window.addEventListener('DOMContentLoaded', () => {
-  input.value=`# جزوه نمونه با ابزارهای پیشرفته\n\n## نمودار گرافیکی Mermaid\n\n\`\`\`mermaid\ngraph TD\n    A[شروع مطالعه] --> B(یادداشت برداری)\n    B --> C{آیا کلمات کلیدی مهم هستند؟}\n    C -- بله --> D[هایلایت و تغییر استایل کلمه]\n    C -- خیر --> E[ادامه خواندن]\n    D --> F[موفقیت در امتحان]\n    E --> F\n\`\`\`\n\n## معادلات ریاضی\n\nفرمول انرژی اینشتین: $E = mc^2$\n\nمعادله دیفرانسیل:\n\n$$\\\\frac{d^2y}{dx^2} + \\\\omega^2 y = 0$$\n\n## جدول نمونه\n\n| لایه | مقاومت کششی | عروق |\n|------|-------------|------|\n| اپیدرم | ندارد | آواسکولار |\n| درم | بالا | پرعروق |\n\n## لیست\n- نکته اول این بخش بسیار مهم است\n- نکته دوم\n- نکته سوم\n\n> این یک blockquote است.\n`;
+/* ============ Init ============ */
+window.addEventListener('DOMContentLoaded', async () => {
+  input.value=`# جزوه نمونه با ابزارهای پیشرفته\n\n## نمودار گرافیکی Mermaid\n\n\`\`\`mermaid\ngraph TD\n    A[شروع مطالعه] --> B(یادداشت برداری)\n    B --> C{آیا کلمات کلیدی مهم هستند؟}\n    C -- بله --> D[هایلایت و تغییر استایل کلمه]\n    C -- خیر --> E[ادامه خواندن]\n    D --> F[موفقیت در امتحان]\n    E --> F\n\`\`\`\n\n## معادلات ریاضی\n\nفرمول انرژی اینشتین: $E = mc^2$\n\n$$\\\\frac{d^2y}{dx^2} + \\\\omega^2 y = 0$$\n\n## جدول نمونه\n\n| لایه | مقاومت کششی | عروق |\n|------|-------------|------|\n| اپیدرم | ندارد | آواسکولار |\n| درم | بالا | پرعروق |\n\n## لیست\n- نکته اول\n- نکته دوم\n\n> این یک blockquote است.\n\n\`code inline\` و بلوک کد:\n\n\`\`\`python\ndef hello():\n    print("salam")\n\`\`\`\n`;
+
+  loadTemplatesFromStorage();
+  refreshAllFontDropdowns();
+  applyTemplate(currentTemplate);
+  await loadAndRegisterFonts();
+  applyTemplateValues(liveTemplateValues);
+
+  const fontDropZone = document.getElementById('fontDropZone');
+  if(fontDropZone){
+    fontDropZone.addEventListener('dragover', e => { e.preventDefault(); fontDropZone.classList.add('dragover'); });
+    fontDropZone.addEventListener('dragleave', () => fontDropZone.classList.remove('dragover'));
+    fontDropZone.addEventListener('drop', async e => {
+      e.preventDefault(); fontDropZone.classList.remove('dragover');
+      await handleFontFiles(Array.from(e.dataTransfer.files || []));
+    });
+    fontDropZone.addEventListener('click', () => document.getElementById('fontBulkFileInput').click());
+  }
+  const bulkInput = document.getElementById('fontBulkFileInput');
+  if(bulkInput){
+    bulkInput.addEventListener('change', async function(){
+      await handleFontFiles(Array.from(this.files || []));
+      this.value = '';
+    });
+  }
+
   renderPreview();
   saveState();
 
   bindPasteToDropZone(document.getElementById('dropZone'), dataUrl => {
     imgBase64 = dataUrl;
     const p = document.getElementById('imgPreview');
-    p.src = dataUrl;
-    p.style.display = 'block';
+    p.src = dataUrl; p.style.display = 'block';
     document.getElementById('imgUrlInput').value = '';
     saveState();
   });
-
   bindPasteToDropZone(document.getElementById('coverDropZone'), dataUrl => {
     coverImgData = dataUrl;
     coverImgPreview.src = dataUrl;
